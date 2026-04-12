@@ -123,3 +123,8 @@ return (
 );
 };
 ```
+
+## 7. Routing:
+
+- **Rule**: No routes defined inside feature folders. All routes are centralized in `src/routes/`.
+- **Reason**: It provides a single source of truth for the app's structure and makes "Protected Route" logic easier to manage globally.

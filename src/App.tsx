@@ -7,6 +7,7 @@ import { useAuthStore } from './features/auth/store/useAuthStore';
 import { CustomersPage } from './features/customers/CustomersPage';
 import { ProductsPage } from './features/products/ProductsPage';
 import * as S from './App.styles';
+import { AppRouter } from './routes';
 
 function App() {
   const setUser = useAuthStore((state) => state.setUser);
@@ -51,6 +52,10 @@ function App() {
           {currentPage === 'customers' ? <CustomersPage /> : <ProductsPage />}
         </S.LayoutWrapper>
       </SnackbarProvider>
+      <CssBaseline />
+      <S.LayoutWrapper>
+        <AppRouter />
+      </S.LayoutWrapper>
     </ThemeProvider>
   );
 }
