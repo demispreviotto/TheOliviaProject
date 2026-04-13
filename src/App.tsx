@@ -1,8 +1,11 @@
-import { useEffect } from 'react';
-import { ThemeProvider, CssBaseline, Box, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { ThemeProvider, CssBaseline, Button, Stack } from '@mui/material';
+import { SnackbarProvider } from 'notistack';
 import { theme } from './utils/theme';
 import { supabase } from './api/supabase';
 import { useAuthStore } from './features/auth/store/useAuthStore';
+import { CustomersPage } from './features/customers/CustomersPage';
+import { ProductsPage } from './features/products/ProductsPage';
 import * as S from './App.styles';
 
 function App() {
@@ -22,16 +25,32 @@ function App() {
     return () => subscription.unsubscribe();
   }, [setUser]);
 
+  const [currentPage, setCurrentPage] = useState<'customers' | 'products'>('customers');
+
   return (
     <ThemeProvider theme={theme}>
-      {/* CssBaseline kicks out browser defaults and applies MUI's theme reset */}
-      <CssBaseline />
-      
-      <S.LayoutWrapper>
-        <Typography variant="h3" component="h1">
-          Hello World
-        </Typography>
-      </S.LayoutWrapper>
+      <SnackbarProvider maxSnack={3} autoHideDuration={3000}>
+        <CssBaseline />
+        
+        <S.LayoutWrapper>
+          <Stack direction="row" spacing={2} sx={{ mb: 4 }}>
+            <Button 
+              variant={currentPage === 'customers' ? 'contained' : 'outlined'} 
+              onClick={() => setCurrentPage('customers')}
+            >
+              Clientes
+            </Button>
+            <Button 
+              variant={currentPage === 'products' ? 'contained' : 'outlined'} 
+              onClick={() => setCurrentPage('products')}
+            >
+              Productos
+            </Button>
+          </Stack>
+
+          {currentPage === 'customers' ? <CustomersPage /> : <ProductsPage />}
+        </S.LayoutWrapper>
+      </SnackbarProvider>
     </ThemeProvider>
   );
 }
