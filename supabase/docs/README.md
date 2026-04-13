@@ -18,7 +18,7 @@ npx supabase init
 ### 1. Start the Environment
 Run this to spin up all Docker containers (DB, Auth, Studio, etc.).
 ```bash
-npx supabase start
+npx supabase start --> start local environment and get all the variables and keys on terminal. 
 ```
 
 ### 2. Stop the Environment
