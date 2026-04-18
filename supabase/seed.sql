@@ -16,7 +16,7 @@ BEGIN
         now(), now(), '', '', '', ''
     ) ON CONFLICT (id) DO NOTHING;
 
-    -- 2. Insertar en auth.identities (CORREGIDO)
+    -- 2. Insertar en auth.identities (CORREGIDO)ZK
     INSERT INTO auth.identities (id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at)
     VALUES (
         gen_random_uuid(),
