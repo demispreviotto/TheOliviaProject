@@ -99,7 +99,7 @@ export const ItemInfo = styled(Box)({
 });
 
 // Create domain-specific Typography
-export const ItemName = styled(Typography)(({ theme }) => ({
+export const ItemName = styled(Typography)(() => ({
   variant: 'subtitle1',
   fontWeight: 'bold',
 }));
