@@ -1,16 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import App from './App';
+import { useAuthStore } from './features/auth/store/useAuthStore';
 
-const queryClient = new QueryClient();
+const startApp = async () => {
+  // Wait for Supabase to check the session before rendering anything
+  await useAuthStore.getState().initialize();
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
       <App />
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
-  </React.StrictMode>
-);
+    </React.StrictMode>
+  );
+};
+
+startApp();

@@ -1,3 +1,4 @@
+-- supabase/seed.sql
 -- ##########################################
 -- SEED.SQL - Datos de prueba para The Olivia Project
 -- ##########################################
@@ -27,6 +28,10 @@ BEGIN
         now(),
         now()
     ) ON CONFLICT (provider, provider_id) DO NOTHING;
+    -- 3. Insert into public.profiles
+    INSERT INTO public.profiles (id, full_name, role)
+    VALUES (user_id, 'Admin Olivia', 'admin')
+    ON CONFLICT (id) DO NOTHING;
 
 -- 2. POBLAR CLIENTES (Ponemos los IDs a mano)
     INSERT INTO public.customers (id, category, full_name, company_name, phone, email, delivery_address)

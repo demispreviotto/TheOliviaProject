@@ -12,7 +12,9 @@ dist
 dist-ssr
 *.local
 .env
+.env.keys
 .env.local
+.env.*.local
 
 # Editor directories and files
 .vscode/*
@@ -25,5 +27,8 @@ dist-ssr
 *.sln
 *.sw?
 
+# Supabase
+.branches
+.temp
 supabase/.branches/
 supabase/.temp/

@@ -1,3 +1,4 @@
+// src/features/customers/api/useCreateCustomer.ts
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../api/supabase';
 import type { CreateCustomerInput, Customer } from './customer.types';

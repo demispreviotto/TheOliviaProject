@@ -31,18 +31,18 @@ To keep components clean, we separate styles into a companion `.styles.ts` file 
 `UserCard.styles.ts`
 
 ```ts
-import { styled } from "@mui/material/styles";
-import { Box, Typography } from "@mui/material";
+import { styled } from '@mui/material/styles';
+import { Box, Typography } from '@mui/material';
 
 // Use 'styled' to wrap MUI components or raw HTML tags
 export const Root = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(2),
-  border: `1px solid ${theme.palette.divider}`,
+	padding: theme.spacing(2),
+	border: `1px solid ${theme.palette.divider}`,
 }));
 
 export const Title = styled(Typography)({
-  fontWeight: 600,
-  color: "primary.main",
+	fontWeight: 600,
+	color: 'primary.main',
 });
 ```
 

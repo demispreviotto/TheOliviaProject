@@ -1,3 +1,4 @@
+-- supabase/migrations/20260411_v0_initial_schema.sql
 -- ##########################################
 -- 1. EXTENSIONES (Para generar UUIDs)
 -- ##########################################
@@ -151,3 +152,28 @@ $$ language 'plpgsql';
 CREATE TRIGGER update_customers_updated_at BEFORE UPDATE ON customers FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 CREATE TRIGGER update_order_items_updated_at BEFORE UPDATE ON order_items FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column(); 
+
+
+-- ##########################################
+-- 5. TABLA: PROFILES (Detalle de Perfil)
+-- ##########################################
+
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL PRIMARY KEY,
+  full_name TEXT,
+  role TEXT DEFAULT 'staff',
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Profiles are viewable by authenticated users" 
+ON public.profiles FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Users can update own profile" 
+ON public.profiles FOR UPDATE TO authenticated USING (auth.uid() = id);
+
+-- Trigger for updated_at
+CREATE TRIGGER update_profiles_updated_at 
+BEFORE UPDATE ON public.profiles 
+FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
