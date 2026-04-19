@@ -1,3 +1,4 @@
+// src/features/products/api/useUpdateProduct.ts
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../api/supabase';
 import type { UpdateProductInput, Product } from './product.types';

@@ -4,7 +4,7 @@ import { LoginPage } from '../features/auth/LoginPage';
 import { HomePage } from '../features/dashboard/HomePage';
 import { ProductsPage } from '../features/products/ProductsPage';
 import { CustomersPage } from '../features/customers/CustomersPage';
-import { ProtectedLayout } from './ProtectedLayout';
+import { ProtectedLayout } from '../layouts/ProtectedLayout';
 import type { JSX } from 'react';
 
 

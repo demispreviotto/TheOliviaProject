@@ -1,3 +1,4 @@
+// src/features/products/components/ProductForm.tsx
 import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -31,10 +32,12 @@ const schema = z.object({
 interface ProductFormProps {
   initialData?: Product | null;
   onSubmit: (data: any) => void;
+  onCancel: () => void;
   isLoading?: boolean;
+  isReadOnly?: boolean;
 }
 
-export const ProductForm = ({ initialData, onSubmit, isLoading }: ProductFormProps) => {
+export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isReadOnly=false }: ProductFormProps) => {
   const {
     control,
     handleSubmit,
@@ -62,10 +65,7 @@ export const ProductForm = ({ initialData, onSubmit, isLoading }: ProductFormPro
   }, [initialData, reset]);
 
   return (
-    <S.FormContainer elevation={2}>
-      <Typography variant="h5" sx={{ mb: 3 }}>
-        {initialData ? 'Editar Producto' : 'Nuevo Producto'}
-      </Typography>
+<>
       <form onSubmit={handleSubmit(onSubmit)}>
         <S.FormWrapper>
           <Grid container spacing={3}>
@@ -79,6 +79,7 @@ export const ProductForm = ({ initialData, onSubmit, isLoading }: ProductFormPro
                     {...field}
                     label="Nombre del Producto"
                     fullWidth
+                    disabled={isReadOnly}
                     error={!!errors.product_name}
                     helperText={errors.product_name?.message}
                   />
@@ -88,7 +89,7 @@ export const ProductForm = ({ initialData, onSubmit, isLoading }: ProductFormPro
 
             {/* Categoría */}
             <Grid size={{ xs: 12, md: 4 }}>
-              <FormControl fullWidth error={!!errors.product_category}>
+              <FormControl fullWidth disabled={isReadOnly} error={!!errors.product_category}>
                 <InputLabel id="product-category-label">Categoría</InputLabel>
                 <Controller
                   name="product_category"
@@ -123,6 +124,7 @@ export const ProductForm = ({ initialData, onSubmit, isLoading }: ProductFormPro
                     {...field}
                     label="Presentación (ej: Bolsa x 12, Pote 500g)"
                     fullWidth
+                    disabled={isReadOnly}
                     error={!!errors.presentation}
                     helperText={errors.presentation?.message}
                   />
@@ -141,6 +143,7 @@ export const ProductForm = ({ initialData, onSubmit, isLoading }: ProductFormPro
                     label="Precio Minorista ($)"
                     type="number"
                     fullWidth
+                    disabled={isReadOnly}
                     error={!!errors.retail_price}
                     helperText={errors.retail_price?.message}
                   />
@@ -158,6 +161,7 @@ export const ProductForm = ({ initialData, onSubmit, isLoading }: ProductFormPro
                     label="Precio Mayorista ($)"
                     type="number"
                     fullWidth
+                    disabled={isReadOnly}
                     error={!!errors.wholesale_price}
                     helperText={errors.wholesale_price?.message}
                   />
@@ -170,21 +174,21 @@ export const ProductForm = ({ initialData, onSubmit, isLoading }: ProductFormPro
               <Controller
                 name="is_active"
                 control={control}
+                disabled={isReadOnly}
                 render={({ field }) => (
                   <FormControlLabel
-                    control={<Switch {...field} checked={field.value} />}
-                    label="Producto Activo"
+                  control={<Switch {...field} checked={field.value} />}
+                  label="Producto Activo"
                   />
                 )}
-              />
+                />
             </Grid>
 
             {/* Botón de envío */}
+                {!isReadOnly && (
             <Grid size={{ xs: 12 }}>
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-                <Button variant="outlined" onClick={() => reset()} disabled={isLoading}>
-                  Limpiar
-                </Button>
+                <Button onClick={onCancel}>Cancelar</Button>
                 <Button 
                   type="submit" 
                   variant="contained" 
@@ -195,9 +199,10 @@ export const ProductForm = ({ initialData, onSubmit, isLoading }: ProductFormPro
                 </Button>
               </Box>
             </Grid>
+            )}
           </Grid>
         </S.FormWrapper>
       </form>
-    </S.FormContainer>
+</>
   );
 };

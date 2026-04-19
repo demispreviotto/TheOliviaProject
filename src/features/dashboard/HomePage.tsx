@@ -18,7 +18,7 @@ export const HomePage = () => {
     <S.HomeContainer>
       <S.HeaderStack>
         <S.WelcomeTitle variant="h4">
-          ¡Hola, {userName}! 🥐
+          ¡Hola, {userName}!
         </S.WelcomeTitle>
       </S.HeaderStack>
 

@@ -1,3 +1,4 @@
+// src/features/customers/components/CustomerForm.tsx
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -10,7 +11,6 @@ import {
   InputLabel, 
   Select, 
   FormHelperText,
-  Typography,
   Divider,
   Grid,
   Box
@@ -47,10 +47,12 @@ const schema = z.object({
 interface CustomerFormProps {
   initialData?: Customer | null;
   onSubmit: (data: any) => void;
+  onCancel: () => void;
   isLoading?: boolean;
+  isReadOnly?: boolean;
 }
 
-export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormProps) => {
+export const CustomerForm = ({ initialData, onSubmit, onCancel, isLoading, isReadOnly= false }: CustomerFormProps) => {
   const {
     control,
     handleSubmit,
@@ -99,16 +101,12 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormP
   };
 
   return (
-    <S.FormContainer elevation={2}>
-      <Typography variant="h5" sx={{ mb: 3 }}>
-        {initialData ? 'Editar Cliente' : 'Nuevo Cliente'}
-      </Typography>
+    <>
       <form onSubmit={handleSubmit(onFormSubmit)}>
         <S.FormWrapper>
           <Grid container spacing={2}>
-            {/* Categoría */}
             <Grid size={{ xs: 12, md: 6 }}>
-              <FormControl fullWidth error={!!errors.category}>
+              <FormControl fullWidth error={!!errors.category} disabled={isReadOnly}>
                 <InputLabel id="category-label">Categoría</InputLabel>
                 <Controller
                   name="category"
@@ -138,6 +136,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormP
                     {...field}
                     label="Nombre Completo"
                     fullWidth
+                    disabled={isReadOnly}
                     error={!!errors.full_name}
                     helperText={errors.full_name?.message}
                   />
@@ -155,6 +154,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormP
                     {...field}
                     label="Email"
                     fullWidth
+                    disabled={isReadOnly}
                     error={!!errors.email}
                     helperText={errors.email?.message}
                   />
@@ -172,6 +172,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormP
                     {...field}
                     label="Teléfono"
                     fullWidth
+                    disabled={isReadOnly}
                     mask="+54 (9) 000 000-0000"
                     placeholder="+54 (9) 11 1234-5678"
                     error={!!errors.phone}
@@ -191,6 +192,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormP
                     {...field}
                     label="Dirección de Entrega"
                     fullWidth
+                    disabled={isReadOnly}
                     multiline
                     rows={2}
                     error={!!errors.delivery_address}
@@ -216,6 +218,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormP
                         {...field}
                         label="Razón Social"
                         fullWidth
+                        disabled={isReadOnly}
                         error={!!errors.company_name}
                         helperText={errors.company_name?.message}
                       />
@@ -232,6 +235,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormP
                         {...field}
                         label="CUIT / DNI"
                         fullWidth
+                        disabled={isReadOnly}
                         mask={[
                           { mask: '00000000' }, // DNI
                           { mask: '00-00000000-0' } // CUIT
@@ -252,6 +256,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormP
                         {...field}
                         label="Dirección de Facturación"
                         fullWidth
+                        disabled={isReadOnly}
                         error={!!errors.billing_address}
                         helperText={errors.billing_address?.message}
                       />
@@ -271,6 +276,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormP
                     {...field}
                     label="Notas"
                     fullWidth
+                    disabled={isReadOnly}
                     multiline
                     rows={3}
                   />
@@ -279,11 +285,12 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormP
             </Grid>
 
             {/* Botón de envío */}
+{!isReadOnly && (
             <Grid size={{ xs: 12 }}>
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-                <Button variant="outlined" disabled={isLoading} onClick={() => reset()}>
-                  Limpiar
-                </Button>
+                <Button variant="outlined" onClick={onCancel} disabled={isLoading}>
+                Cancelar
+              </Button>
                 <Button 
                   type="submit" 
                   variant="contained" 
@@ -294,9 +301,11 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormP
                 </Button>
               </Box>
             </Grid>
+)}
           </Grid>
         </S.FormWrapper>
       </form>
-    </S.FormContainer>
+    {/* </S.FormContainer> */}
+    </>
   );
 };

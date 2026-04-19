@@ -1,3 +1,4 @@
+// src/features/products/api/useCreateProduct.ts
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../api/supabase';
 import type { CreateProductInput, Product } from './product.types';

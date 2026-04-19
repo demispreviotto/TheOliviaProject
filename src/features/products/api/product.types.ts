@@ -1,3 +1,4 @@
+// src/features/products/api/product.types.ts
 export type ProductType = 'pepas' | 'budin' | 'cookies' | 'alfajores' | 'pan' | 'talitas' | 'torta';
 
 export interface Product {
