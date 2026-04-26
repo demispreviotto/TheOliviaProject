@@ -1,3 +1,6 @@
+import type { Customer } from "../../customers/api/customer.types";
+import type { Product } from "../../products/api/product.types";
+
 export type OrderStatus = 'pending' | 'cooking' | 'ready' | 'delivered' | 'cancelled';
 export type OrderDeliveryMode = 'pickup' | 'delivery';
 export type OrderPaymentState = 'pending' | 'partially_paid' | 'paid';
@@ -11,6 +14,7 @@ export interface OrderItem {
   unit_price: number;
   discount_amount: number;
   notes?: string | null;
+  products?: Product;
 }
 
 export interface Order {
@@ -27,10 +31,11 @@ export interface Order {
   created_at: string;
   updated_at: string;
   order_items?: OrderItem[];
+  customer?: Customer;
 }
 
 export type CreateOrderInput = Omit<Order, 'id' | 'created_at' | 'updated_at' | 'order_items'> & {
   order_items: OrderItem[];
 };
 
-export type UpdateOrderInput = Partial<CreateOrderInput> & { id: string };
+export type UpdateOrderInput = Partial<CreateOrderInput> & { id: string };

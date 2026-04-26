@@ -1,11 +1,11 @@
 import { styled } from '@mui/material/styles';
-import { Box, Paper, Typography } from '@mui/material';
+import { Box, Chip, Paper, Typography } from '@mui/material';
 
 export const FormContainer = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
   maxWidth: 1000,
   margin: '0 auto',
-  borderRadius: theme.shape.borderRadius * 2,
+  borderRadius: (theme.shape.borderRadius as number) * 2,
 }));
 
 export const FormWrapper = styled(Box)(({ theme }) => ({
@@ -23,11 +23,11 @@ export const ItemsHeader = styled(Box)(({ theme }) => ({
   borderBottom: `2px solid ${theme.palette.divider}`,
 }));
 
-export const ItemListContainer = styled(Box)(({ theme }) => ({
+export const ItemListContainer = styled(Box)({
   display: 'flex',
   flexDirection: 'column',
   gap: 0,
-}));
+});
 
 
 export const ItemRowWrapper = styled(Box)(({ theme }) => ({
@@ -71,4 +71,22 @@ export const SummaryRow = styled(Box)(({ theme }) => ({
 export const TotalLabel = styled(Typography)(({ theme }) => ({
   fontWeight: 700,
   color: theme.palette.primary.main,
+}));
+
+export const RecommendationsWrapper = styled(Box)(({ theme }) => ({
+  textAlign: 'center',
+  marginTop: theme.spacing(1),
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: theme.spacing(0.5),
+}));
+
+export const SuggestionChip = styled(Chip)(({ theme }) => ({
+  cursor: 'pointer',
+  borderStyle: 'dashed',
+  backgroundColor: theme.palette.primary.main + '08',
+  '&:hover': {
+    backgroundColor: theme.palette.primary.main + '15',
+  },
 }));

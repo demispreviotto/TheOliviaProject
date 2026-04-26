@@ -44,9 +44,10 @@ export const CustomerTable = ({ customers, onEdit, onView }: Props) => {
                 {customer.email && <div style={{ fontSize: '0.8rem', color: 'gray' }}>{customer.email}</div>}
               </TableCell>
               <TableCell>{customer.delivery_address}</TableCell>
-              <TableCell align="right"><IconButton onClick={() => onView(customer)} color="info" size="small">
-  <VisibilityIcon />
-</IconButton>
+              <TableCell align="right">
+                <IconButton onClick={() => onView(customer)} color="primary" size="small">
+                  <VisibilityIcon />
+                </IconButton>
                 <IconButton onClick={() => onEdit(customer)} color="primary" size="small">
                   <EditIcon />
                 </IconButton>

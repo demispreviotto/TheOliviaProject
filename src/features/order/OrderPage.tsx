@@ -1,93 +1,89 @@
 import { useState } from 'react';
-import { Box, Typography, Button, Stack, CircularProgress } from '@mui/material';
+import { CircularProgress, Button, Dialog, DialogTitle, DialogContent, IconButton } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
+import { OrderTable } from './components/OrderTable';
 import { OrderForm } from './components/OrderForm';
+import { useOrders } from './api/useOrders';
 import { useCreateOrder } from './api/useCreateOrder';
 import { useUpdateOrder } from './api/useUpdateOrder';
 import { useSnackbar } from 'notistack';
-import { supabase } from '../../api/supabase';
+
 import type { Order } from './api/order.types';
+import * as S from '../customers/CustomersPage.styles';
 
 export const OrderPage = () => {
   const { enqueueSnackbar } = useSnackbar();
+  const { data: orders, isLoading } = useOrders();
   const createMutation = useCreateOrder();
   const updateMutation = useUpdateOrder();
-  
-  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
-  const [isFetchingOrder, setIsFetchingOrder] = useState(false);
+
+  const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view' | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  const handleAction = (mode: 'create' | 'edit' | 'view', order?: Order) => {
+    setSelectedOrder(order || null);
+    setModalMode(mode);
+  };
+
+  const handleClose = () => {
+    setModalMode(null);
+    setSelectedOrder(null);
+  };
 
   const handleFormSubmit = async (data: any) => {
     try {
-      if (editingOrder) {
-        await updateMutation.mutateAsync({ id: editingOrder.id, ...data });
-        enqueueSnackbar('Pedido actualizado correctamente', { variant: 'success' });
+      if (selectedOrder) {
+        await updateMutation.mutateAsync({ id: selectedOrder.id, ...data });
+        enqueueSnackbar('Pedido actualizado', { variant: 'success' });
       } else {
         await createMutation.mutateAsync(data);
-        enqueueSnackbar('Pedido creado correctamente', { variant: 'success' });
+        enqueueSnackbar('Pedido creado', { variant: 'success' });
       }
-      setEditingOrder(null);
+      handleClose();
     } catch (error: any) {
       enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
     }
   };
 
-  const loadTestData = async (id: string) => {
-    setIsFetchingOrder(true);
-    try {
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          order_items (*)
-        `)
-        .eq('id', id)
-        .single();
-      
-      if (error) throw error;
-      setEditingOrder(data as Order);
-      enqueueSnackbar('Pedido cargado para edición', { variant: 'info' });
-    } catch (error: any) {
-      enqueueSnackbar(`Error cargando pedido: ${error.message}`, { variant: 'error' });
-    } finally {
-      setIsFetchingOrder(false);
-    }
-  };
-
   return (
-    <Box sx={{ p: 3 }}>
-      <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Typography variant="h4">Gestión de Pedidos</Typography>
-        <Stack direction="row" spacing={1}>
-          {editingOrder && (
-            <Button variant="text" onClick={() => setEditingOrder(null)}>
-              Cancelar Edición
-            </Button>
-          )}
-        </Stack>
-      </Stack>
+    <S.PageRoot>
+      <S.PageHeader direction="row">
+        <S.PageTitle variant="h4">Pedidos</S.PageTitle>
+        <Button 
+          variant="contained" 
+          startIcon={<AddIcon />} 
+          onClick={() => handleAction('create')}
+        >
+          Nuevo Pedido
+        </Button>
+      </S.PageHeader>
 
-      {isFetchingOrder ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-          <CircularProgress />
-        </Box>
+      {isLoading ? (
+        <S.LoadingBox><CircularProgress /></S.LoadingBox>
       ) : (
-        <OrderForm 
-          initialData={editingOrder} 
-          onSubmit={handleFormSubmit}
-          isLoading={createMutation.isPending || updateMutation.isPending}
+        <OrderTable 
+          orders={orders || []} 
+          onEdit={(o) => handleAction('edit', o)}
+          onView={(o) => handleAction('view', o)}
         />
       )}
 
-      
-      {/* Botones de debug para facilitar al usuario cargar datos si ya tiene IDs */}
-      <Box sx={{ mt: 5, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
-        <Typography variant="caption" display="block" gutterBottom>Debug: Cargar pedido por ID</Typography>
-        <Button size="small" variant="outlined" onClick={() => {
-          const id = prompt('Ingrese UUID del pedido:');
-          if (id) loadTestData(id);
-        }}>
-          Cargar pedido específico
-        </Button>
-      </Box>
-    </Box>
+      <Dialog open={!!modalMode} onClose={handleClose} maxWidth="lg" fullWidth>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {modalMode === 'view' ? 'Resumen de Pedido' : modalMode === 'edit' ? 'Editar Pedido' : 'Nuevo Pedido'}
+          <IconButton onClick={handleClose}><CloseIcon /></IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          <OrderForm 
+            initialData={selectedOrder}
+            onSubmit={handleFormSubmit}
+            onCancel={handleClose}
+            isLoading={createMutation.isPending || updateMutation.isPending}
+            isReadOnly={modalMode === 'view'}
+          />
+        </DialogContent>
+      </Dialog>
+    </S.PageRoot>
   );
 };

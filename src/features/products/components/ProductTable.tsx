@@ -47,7 +47,7 @@ export const ProductTable = ({ products, onEdit, onView }: Props) => {
                 />
               </TableCell>
               <TableCell align="right">
-                <IconButton onClick={() => onView(product)} color="info" size="small">
+                <IconButton onClick={() => onView(product)} color="primary" size="small">
                   <VisibilityIcon />
                 </IconButton>
                 <IconButton onClick={() => onEdit(product)} color="primary" size="small">

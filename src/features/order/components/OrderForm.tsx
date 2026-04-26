@@ -14,15 +14,17 @@ import {
   Box,
   Autocomplete,
   IconButton,
+  Stack,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import ChatBubbleOutlinedIcon from '@mui/icons-material/ChatBubbleOutlined';
 import * as S from './OrderForm.styles';
-import type { Order, CreateOrderInput } from '../api/order.types';
+import type { Order, CreateOrderInput, OrderItem } from '../api/order.types';
 import { useCustomers } from '../../customers/api/useCustomers';
 import { useProducts } from '../../products/api/useProducts';
 import { MaskedInput } from '../../../components/ui/MaskedInput';
+import { useCustomerHistory } from '../api/useCustomerHistory';
 
 const itemSchema = z.object({
   product_id: z.string().min(1, 'El producto es obligatorio'),
@@ -47,8 +49,10 @@ const schema = z.object({
 
 interface OrderFormProps {
   initialData?: Order | null;
-  onSubmit: (data: CreateOrderInput) => void;
+  onSubmit: (data: any) => void;
+  onCancel: () => void;
   isLoading?: boolean;
+  isReadOnly?: boolean;
 }
 
 // Helpers for date conversion
@@ -64,9 +68,10 @@ const toISODate = (displayDate: string) => {
   return `${year}-${month}-${day}`;
 };
 
-export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) => {
+export const OrderForm = ({ initialData, onSubmit, isLoading, isReadOnly=false,  }: OrderFormProps) => {
   const { data: customers = [] } = useCustomers();
   const { data: products = [] } = useProducts();
+  
   const [visibleNotes, setVisibleNotes] = useState<Record<number, boolean>>({});
 
   const {
@@ -103,6 +108,8 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
     customers.find(c => c.id === watchCustomerId), 
     [customers, watchCustomerId]
   );
+  const { data: lastOrder } = useCustomerHistory(watchCustomerId);
+
 
   // Auto-calculate Total Price
   useEffect(() => {
@@ -166,12 +173,32 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
     event.target.select();
   };
 
-  return (
-    <S.FormContainer elevation={3}>
-      <Typography variant="h5" sx={{ mb: 4, fontWeight: 600 }}>
-        {initialData ? 'Editar Pedido' : 'Nuevo Pedido'}
-      </Typography>
+  const recommendations = useMemo(() => {
+  if (!lastOrder?.order_items) return [];
+  const currentProductIds = watchItems.map(item => item.product_id);
+  return lastOrder.order_items
+    .filter((item: OrderItem) => !currentProductIds.includes(item.product_id))
+    .sort((a: OrderItem, b: OrderItem) => b.quantity - a.quantity)
+    .slice(0, 2);
+}, [lastOrder, watchItems]);
 
+const handleQuickAdd = (recItem: any) => {
+  const product = products.find(p => p.id === recItem.product_id);
+  if (product) {
+    append({
+      product_id: product.id,
+      quantity: recItem.quantity,
+      unit_price: selectedCustomer?.category === 'wholesale' 
+        ? product.wholesale_price 
+        : product.retail_price,
+      discount_amount: 0,
+      notes: '',
+    });
+  }
+};
+
+  return (
+    <>
       <form onSubmit={handleSubmit((data) => onSubmit(data as CreateOrderInput))}>
         <S.FormWrapper>
           <Grid container spacing={3}>
@@ -184,6 +211,7 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
                   <Autocomplete
                     options={customers}
                     getOptionLabel={(option) => `${option.full_name} (${option.category === 'wholesale' ? 'Mayorista' : 'Individual'})`}
+                    disabled={isReadOnly}
                     value={customers.find(c => c.id === value) || null}
                     onChange={(_, newValue) => onChange(newValue?.id || '')}
                     renderInput={(params) => (
@@ -205,6 +233,7 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
               <Controller
                 name="delivery_date"
                 control={control}
+                disabled={isReadOnly}
                 render={({ field: { value, onChange, ...rest } }) => (
                   <MaskedInput
                     {...rest}
@@ -222,11 +251,12 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
 
             {/* Estado del Pedido */}
             <Grid size={{ xs: 12, md: 4 }}>
-              <FormControl fullWidth>
+              <FormControl fullWidth disabled={isReadOnly}>
                 <InputLabel>Estado del Pedido</InputLabel>
                 <Controller
                   name="order_status"
                   control={control}
+                  disabled={isReadOnly}
                   render={({ field }) => (
                     <Select {...field} label="Estado del Pedido">
                       <MenuItem value="pending">Pendiente</MenuItem>
@@ -242,11 +272,12 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
 
             {/* Modo de Entrega */}
             <Grid size={{ xs: 12, md: 4 }}>
-              <FormControl fullWidth>
+              <FormControl fullWidth disabled={isReadOnly}>
                 <InputLabel>Entrega</InputLabel>
                 <Controller
                   name="delivery_mode"
                   control={control}
+                  disabled={isReadOnly}
                   render={({ field }) => (
                     <Select {...field} label="Entrega">
                       <MenuItem value="pickup">Retira</MenuItem>
@@ -259,11 +290,12 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
 
             {/* Estado de Pago */}
             <Grid size={{ xs: 12, md: 4 }}>
-              <FormControl fullWidth>
+              <FormControl fullWidth disabled={isReadOnly}>
                 <InputLabel>Estado de Pago</InputLabel>
                 <Controller
                   name="payment_state"
                   control={control}
+                  disabled={isReadOnly}
                   render={({ field }) => (
                     <Select {...field} label="Estado de Pago">
                       <MenuItem value="pending">Pendiente</MenuItem>
@@ -296,6 +328,7 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
                       <Controller
                         name={`order_items.${index}.product_id`}
                         control={control}
+                        disabled={isReadOnly}
                         render={({ field: { value } }) => (
                           <Autocomplete
                             size="small"
@@ -303,7 +336,7 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
                             getOptionLabel={(option) => option.product_name}
                             value={products.find(p => p.id === value) || null}
                             onChange={(_, newValue) => handleProductChange(index, newValue?.id || '')}
-                            disabled={!watchCustomerId}
+                            disabled={isReadOnly || !watchCustomerId}
                             renderInput={(params) => (
                               <TextField
                                 {...params}
@@ -320,6 +353,7 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
                     <Controller
                       name={`order_items.${index}.quantity`}
                       control={control}
+                      disabled={isReadOnly}
                       render={({ field }) => (
                         <TextField
                           {...field}
@@ -337,6 +371,7 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
                     <Controller
                       name={`order_items.${index}.unit_price`}
                       control={control}
+                      disabled={isReadOnly}
                       render={({ field }) => (
                         <TextField
                           {...field}
@@ -354,6 +389,7 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
                     <Controller
                       name={`order_items.${index}.discount_amount`}
                       control={control}
+                      disabled={isReadOnly}
                       render={({ field }) => (
                         <TextField
                           {...field}
@@ -373,6 +409,7 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
                         size="small" 
                         onClick={() => toggleNote(index)}
                         color={watchItems[index]?.notes ? "primary" : "default"}
+                        disabled={isReadOnly}
                       >
                         <ChatBubbleOutlinedIcon fontSize="small" />
                       </IconButton>
@@ -386,11 +423,11 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
                     </Box>
 
                     {/* Eliminar */}
-                    <Box disable-style-alias="true">
+                    {!isReadOnly && (
                       <IconButton color="error" onClick={() => remove(index)} size="small">
-                        <DeleteIcon fontSize="small" />
+                        <DeleteIcon fontSize="small"/>
                       </IconButton>
-                    </Box>
+                  )}
                   </S.ItemRow>
 
                   {/* Campo de Nota (Condicional) */}
@@ -399,6 +436,7 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
                       <Controller
                         name={`order_items.${index}.notes`}
                         control={control}
+                        disabled={isReadOnly}
                         render={({ field }) => (
                           <TextField
                             {...field}
@@ -417,17 +455,42 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
             </S.ItemListContainer>
 
             {/* Nuevo Botón Agregar Producto al final de la lista */}
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-              <Button 
-                startIcon={<AddCircleOutlinedIcon />} 
-                onClick={handleAddItem}
-                variant="text"
-                color="primary"
-              >
-                Agregar Producto
-              </Button>
-            </Box>
-          </Box>
+            {!isReadOnly && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                <Button 
+                  startIcon={<AddCircleOutlinedIcon />} 
+                  onClick={handleAddItem}
+                  // variant="text"
+                  variant="outlined"
+                  color="primary">
+                  Agregar Producto
+                </Button>
+              </Box>
+            )}
+          {/* </Box> */}
+
+          {/* Recommendations Section */}
+          {!isReadOnly && recommendations.length > 0 && (
+            <S.RecommendationsWrapper>
+              <Typography variant="caption" color="text.secondary">
+                Sugeridos del pedido anterior:
+              </Typography>
+              <Stack direction="row" spacing={1}>
+                {recommendations.map((rec: OrderItem) => (
+                  <S.SuggestionChip
+                    key={rec.product_id}
+                    // TypeScript is happy now!
+                    label={`+ ${rec.products?.product_name} (${rec.quantity})`}
+                    onClick={() => handleQuickAdd(rec)}
+                    size="small"
+                    variant="outlined"
+                    color="primary"
+                  />
+                ))}
+              </Stack>
+            </S.RecommendationsWrapper>
+      )}
+  </Box>
 
           <S.TotalContainer elevation={0} variant="outlined">
             <Grid container spacing={3}>
@@ -438,6 +501,7 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
                       <Controller
                         name="transfer_amount"
                         control={control}
+                        disabled={isReadOnly}
                         render={({ field }) => (
                           <TextField
                             {...field}
@@ -455,6 +519,7 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
                       <Controller
                         name="cash_amount"
                         control={control}
+                        disabled={isReadOnly}
                         render={({ field }) => (
                           <TextField
                             {...field}
@@ -474,9 +539,9 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
                         <Controller
                           name="pay_method"
                           control={control}
+                          disabled={isReadOnly}
                           render={({ field }) => (
                             <Select {...field} label="Método de Pago">
-                              <MenuItem value={null}>N/A</MenuItem>
                               <MenuItem value="cash">Efectivo</MenuItem>
                               <MenuItem value="transfer">Transferencia</MenuItem>
                               <MenuItem value="mixed">Mixto</MenuItem>
@@ -491,30 +556,34 @@ export const OrderForm = ({ initialData, onSubmit, isLoading }: OrderFormProps) 
                 <S.SummaryRow>
                   <Typography variant="h6">Total del Pedido:</Typography>
                   <S.TotalLabel variant="h4">
-                    ${watch('total_price').toFixed(2)}
+                    ${watch('total_price')?.toFixed(2)}
                   </S.TotalLabel>
                 </S.SummaryRow>
               </Grid>
             </Grid>
           </S.TotalContainer>
 
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-            <Button variant="outlined" onClick={() => reset()} disabled={isLoading}>
-              Limpiar
-            </Button>
-            <Button 
-              type="submit" 
-              variant="contained" 
-              color="primary" 
-              size="large"
-              disabled={isLoading || watchItems.length === 0}
-            >
+          {(!isReadOnly) && (
+            <>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+              <Button variant="outlined" onClick={() => reset()} disabled={isLoading}>
+                Limpiar
+              </Button>
+              <Button 
+                type="submit" 
+                variant="contained" 
+                color="primary" 
+                size="large"
+                disabled={isLoading || watchItems.length === 0}
+                >
               {isLoading ? 'Guardando...' : (initialData ? 'Actualizar Pedido' : 'Confirmar Pedido')}
             </Button>
           </Box>
+              </>
+         )}
         </S.FormWrapper>
       </form>
-    </S.FormContainer>
+    </>
   );
 };
 
