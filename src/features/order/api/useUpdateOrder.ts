@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../../../api/supabase';
-import type { UpdateOrderInput, Order } from './order.types';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { Order, UpdateOrderInput } from "./order.types";
+import { supabase } from "../../../api/supabase";
 
 export const useUpdateOrder = () => {
   const queryClient = useQueryClient();
@@ -28,13 +28,14 @@ export const useUpdateOrder = () => {
 
         if (deleteError) throw deleteError;
 
-        // 3. Insert new items
-        const itemsToInsert = order_items.map((item) => ({
-          ...item,
-          order_id: id,
-          // Remove ID if present to let Supabase generate new ones (since we deleted all)
-          id: undefined, 
-        }));
+        const itemsToInsert = order_items.map((item) => {
+          const { id: _, ...cleanItem } = item; 
+          
+          return {
+            ...cleanItem,
+            order_id: id,
+          };
+        });
 
         const { error: itemsError } = await supabase
           .from('order_items')

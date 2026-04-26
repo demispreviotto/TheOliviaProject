@@ -1,4 +1,4 @@
-import { useForm, Controller, useFieldArray } from 'react-hook-form';
+import { useForm, Controller, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useEffect, useMemo, useState } from 'react';
@@ -20,17 +20,18 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import ChatBubbleOutlinedIcon from '@mui/icons-material/ChatBubbleOutlined';
 import * as S from './OrderForm.styles';
-import type { Order, CreateOrderInput, OrderItem } from '../api/order.types';
+import type { Order, OrderItem } from '../api/order.types';
 import { useCustomers } from '../../customers/api/useCustomers';
 import { useProducts } from '../../products/api/useProducts';
 import { MaskedInput } from '../../../components/ui/MaskedInput';
 import { useCustomerHistory } from '../api/useCustomerHistory';
 
 const itemSchema = z.object({
+  id: z.string().optional(),
   product_id: z.string().min(1, 'El producto es obligatorio'),
-  quantity: z.number().min(1, 'Mínimo 1'),
-  unit_price: z.number().min(0, 'Precio inválido'),
-  discount_amount: z.number().min(0, 'Descuento inválido'),
+  quantity: z.coerce.number().min(1, 'Mínimo 1'),
+  unit_price: z.coerce.number().min(0, 'Precio inválido'),
+  discount_amount: z.coerce.number().min(0, 'Descuento inválido'),
   notes: z.string().optional().nullable(),
 });
 
@@ -77,7 +78,7 @@ export const OrderForm = ({ initialData, onSubmit, isLoading, isReadOnly=false, 
   const {
     control,
     handleSubmit,
-    watch,
+    // watch,
     setValue,
     reset,
     formState: { errors },
@@ -102,22 +103,22 @@ export const OrderForm = ({ initialData, onSubmit, isLoading, isReadOnly=false, 
     name: "order_items",
   });
 
-  const watchItems = watch("order_items");
-  const watchCustomerId = watch("customer_id");
+  // const watchItems = watch("order_items");
+  const watchItems = useWatch({
+    control,
+    name: "order_items",
+    defaultValue: [],
+  });
+  // const watchCustomerId = watch("customer_id");
+  const watchCustomerId = useWatch({
+    control,
+    name: "customer_id",
+  });
   const selectedCustomer = useMemo(() => 
     customers.find(c => c.id === watchCustomerId), 
     [customers, watchCustomerId]
   );
   const { data: lastOrder } = useCustomerHistory(watchCustomerId);
-
-
-  // Auto-calculate Total Price
-  useEffect(() => {
-    const total = watchItems.reduce((acc, item) => {
-      return acc + (item.unit_price * item.quantity) - (item.discount_amount || 0);
-    }, 0);
-    setValue('total_price', total);
-  }, [watchItems, setValue]);
 
   // Load initial data
   useEffect(() => {
@@ -126,6 +127,7 @@ export const OrderForm = ({ initialData, onSubmit, isLoading, isReadOnly=false, 
         ...initialData,
         pay_method: initialData.pay_method || null,
         order_items: (initialData.order_items || []).map(item => ({
+  id: item.id, 
           product_id: item.product_id,
           quantity: item.quantity,
           unit_price: item.unit_price,
@@ -159,8 +161,9 @@ export const OrderForm = ({ initialData, onSubmit, isLoading, isReadOnly=false, 
         ? product.wholesale_price 
         : product.retail_price;
       
-      setValue(`order_items.${index}.unit_price`, price);
-      setValue(`order_items.${index}.product_id`, productId);
+      // We use shouldDirty: true to ensure the form state knows it changed
+      setValue(`order_items.${index}.unit_price`, price, { shouldDirty: true });
+      setValue(`order_items.${index}.product_id`, productId, { shouldDirty: true });
     }
   };
 
@@ -197,9 +200,38 @@ const handleQuickAdd = (recItem: any) => {
   }
 };
 
+const processSubmit = (data: any) => {
+  const finalTotal = data.order_items.reduce((acc: number, item: any) => {
+    return acc + (Number(item.unit_price) * Number(item.quantity)) - Number(item.discount_amount || 0);
+  }, 0);
+
+  const cleanedItems = data.order_items.map((item: any) => ({
+    product_id: item.product_id,
+    quantity: Number(item.quantity),
+    unit_price: Number(item.unit_price),
+    discount_amount: Number(item.discount_amount),
+    notes: item.notes || '',
+  }));
+
+  onSubmit({
+    ...data,
+    total_price: finalTotal,
+    order_items: cleanedItems
+  });
+};
+
+const calculatedTotal = useMemo(() => {
+    return (watchItems || []).reduce((acc, item) => {
+      const price = Number(item?.unit_price || 0);
+      const qty = Number(item?.quantity || 0);
+      const disc = Number(item?.discount_amount || 0);
+      return acc + (price * qty) - disc;
+    }, 0);
+  }, [watchItems]);
+
   return (
     <>
-      <form onSubmit={handleSubmit((data) => onSubmit(data as CreateOrderInput))}>
+      <form onSubmit={handleSubmit(processSubmit)}>
         <S.FormWrapper>
           <Grid container spacing={3}>
             {/* Cliente */}
@@ -417,8 +449,13 @@ const handleQuickAdd = (recItem: any) => {
 
                     {/* Subtotal (Calculado) */}
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', pr: 1 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {/* <Typography variant="body2" sx={{ fontWeight: 600 }}>
                         ${((watchItems[index]?.unit_price || 0) * (watchItems[index]?.quantity || 0) - (watchItems[index]?.discount_amount || 0)).toFixed(2)}
+                      </Typography> */}
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        {/* Add a check for watchItems[index] to prevent crash on delete */}
+                        ${((Number(watchItems[index]?.unit_price || 0) * Number(watchItems[index]?.quantity || 0)) - 
+                            Number(watchItems[index]?.discount_amount || 0)).toFixed(2)}
                       </Typography>
                     </Box>
 
@@ -460,14 +497,12 @@ const handleQuickAdd = (recItem: any) => {
                 <Button 
                   startIcon={<AddCircleOutlinedIcon />} 
                   onClick={handleAddItem}
-                  // variant="text"
                   variant="outlined"
                   color="primary">
                   Agregar Producto
                 </Button>
               </Box>
             )}
-          {/* </Box> */}
 
           {/* Recommendations Section */}
           {!isReadOnly && recommendations.length > 0 && (
@@ -479,7 +514,6 @@ const handleQuickAdd = (recItem: any) => {
                 {recommendations.map((rec: OrderItem) => (
                   <S.SuggestionChip
                     key={rec.product_id}
-                    // TypeScript is happy now!
                     label={`+ ${rec.products?.product_name} (${rec.quantity})`}
                     onClick={() => handleQuickAdd(rec)}
                     size="small"
@@ -490,8 +524,7 @@ const handleQuickAdd = (recItem: any) => {
               </Stack>
             </S.RecommendationsWrapper>
       )}
-  </Box>
-
+        </Box>
           <S.TotalContainer elevation={0} variant="outlined">
             <Grid container spacing={3}>
               <Grid size={{ xs: 12, md: 6 }}>
@@ -556,7 +589,7 @@ const handleQuickAdd = (recItem: any) => {
                 <S.SummaryRow>
                   <Typography variant="h6">Total del Pedido:</Typography>
                   <S.TotalLabel variant="h4">
-                    ${watch('total_price')?.toFixed(2)}
+                    ${calculatedTotal.toFixed(2)}
                   </S.TotalLabel>
                 </S.SummaryRow>
               </Grid>
