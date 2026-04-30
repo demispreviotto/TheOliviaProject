@@ -30,7 +30,7 @@ export const CustomerTable = ({ customers, onEdit, onView }: Props) => {
           {customers.map((customer) => (
             <TableRow key={customer.id} hover>
               <TableCell>
-                {customer.category === 'wholesale' ? customer.company_name : customer.full_name}
+                {customer.full_name}
               </TableCell>
               <TableCell>
                 <Chip 

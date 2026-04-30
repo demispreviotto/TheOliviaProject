@@ -220,6 +220,13 @@ const processSubmit = (data: any) => {
   });
 };
 
+const productLabelConstructor = (option: any) => {
+  const productName = option.product_name || 'Producto Desconocido';
+  const productCategory = option.product_category || '';
+  const productPresentation = option.presentation || '';
+  return `${productName} - ${productCategory} - ${productPresentation}`;
+}
+
 const calculatedTotal = useMemo(() => {
     return (watchItems || []).reduce((acc, item) => {
       const price = Number(item?.unit_price || 0);
@@ -365,7 +372,7 @@ const calculatedTotal = useMemo(() => {
                           <Autocomplete
                             size="small"
                             options={products}
-                            getOptionLabel={(option) => option.product_name}
+                            getOptionLabel={(option) => productLabelConstructor(option)}
                             value={products.find(p => p.id === value) || null}
                             onChange={(_, newValue) => handleProductChange(index, newValue?.id || '')}
                             disabled={isReadOnly || !watchCustomerId}
