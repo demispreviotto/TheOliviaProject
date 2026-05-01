@@ -1,15 +1,52 @@
 import { createTheme } from '@mui/material/styles';
+import m3Theme from './material-theme.json';
+const { light } = m3Theme.schemes;
 
 export const theme = createTheme({
-  palette: {
+palette: {
+    mode: 'light',
     primary: {
-      main: '#6d7024', // Standard MUI Blue #1976d2
+      main: light.primary,
+      contrastText: light.onPrimary,
+    },
+    secondary: {
+      main: light.secondary,
+      contrastText: light.onSecondary,
+    },
+    error: {
+      main: light.error,
+      contrastText: light.onError,
     },
     background: {
-      default: '#f5f5f5',
+      default: light.background,
+      paper: light.surfaceVariant,
+    },
+    text: {
+      primary: light.onSurface,
+      secondary: light.onSurfaceVariant,
     },
   },
-  typography: {
-    fontFamily: 'Roboto, Arial, sans-serif',
+ 
+  shape: {
+    borderRadius: 16, 
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 100,
+          textTransform: 'none',
+          padding: '10px 24px',
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+          backgroundColor: light.surfaceContainerLow,
+        },
+      },
+    },
   },
 });
