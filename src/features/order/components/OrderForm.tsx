@@ -69,6 +69,14 @@ const toISODate = (displayDate: string) => {
   return `${year}-${month}-${day}`;
 };
 
+const ALLOWED_STATUS_TRANSITIONS: Record<string, string[]> = {
+  pending:   ['pending', 'cooking', 'cancelled'],
+  cooking:   ['cooking', 'cancelled'],
+  ready:     ['ready', 'delivered', 'cancelled'],
+  delivered: ['delivered'],
+  cancelled: ['cancelled'],
+};
+
 export const OrderForm = ({ initialData, onSubmit, isLoading, isReadOnly=false,  }: OrderFormProps) => {
   const { data: customers = [] } = useCustomers();
   const { data: products = [] } = useProducts();
@@ -296,15 +304,22 @@ const calculatedTotal = useMemo(() => {
                   name="order_status"
                   control={control}
                   disabled={isReadOnly}
-                  render={({ field }) => (
-                    <Select {...field} label="Estado del Pedido">
-                      <MenuItem value="pending">Pendiente</MenuItem>
-                      <MenuItem value="cooking">En Cocina</MenuItem>
-                      <MenuItem value="ready">Listo</MenuItem>
-                      <MenuItem value="delivered">Entregado</MenuItem>
-                      <MenuItem value="cancelled">Cancelado</MenuItem>
-                    </Select>
-                  )}
+                  render={({ field }) => {
+                    const allowed = initialData?.order_status
+                      ? ALLOWED_STATUS_TRANSITIONS[initialData.order_status] ?? []
+                      : null;
+                    const isDisabled = (value: string) =>
+                      allowed !== null && !allowed.includes(value);
+                    return (
+                      <Select {...field} label="Estado del Pedido">
+                        <MenuItem value="pending" disabled={isDisabled('pending')}>Pendiente</MenuItem>
+                        <MenuItem value="cooking" disabled={isDisabled('cooking')}>En Cocina</MenuItem>
+                        <MenuItem value="ready" disabled={isDisabled('ready')}>Listo</MenuItem>
+                        <MenuItem value="delivered" disabled={isDisabled('delivered')}>Entregado</MenuItem>
+                        <MenuItem value="cancelled" disabled={isDisabled('cancelled')}>Cancelado</MenuItem>
+                      </Select>
+                    );
+                  }}
                 />
               </FormControl>
             </Grid>

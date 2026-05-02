@@ -1,14 +1,14 @@
 import { Checkbox, Button, Chip, Stack, Typography, Box, CircularProgress } from '@mui/material';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import type { KitchenProductGroup, KitchenRawItem } from '../api/kitchen.types';
 import type { OrderItemStatus } from '../../order/api/order.types';
 import { STATUS_LABELS } from '../utils/kitchen.utils';
 
 interface Props {
   group: KitchenProductGroup;
-  date: string;
   checked: boolean;
   onCheckChange: (checked: boolean) => void;
-  onAction: (itemIds: string[], newStatus: OrderItemStatus, orderId: string) => void;
+  onAction: (itemIds: string[], newStatus: OrderItemStatus, orderIds: string[]) => void;
   isLoading: boolean;
 }
 
@@ -28,21 +28,24 @@ const groupByStatus = (items: KitchenRawItem[]) => {
   return map;
 };
 
+const uniqueOrderIds = (items: KitchenRawItem[]) => [...new Set(items.map((i) => i.orderId))];
+
 export const ProductGroupRow = ({ group, checked, onCheckChange, onAction, isLoading }: Props) => {
   const statusMap = groupByStatus(group.items);
   const statuses = [...statusMap.keys()];
 
-  const allReady = statuses.every((s) => s === 'ready');
+  const allReady = statuses.every((s) => s === 'ready' || s === 'delivered' || s === 'cancelled');
   const anyPending = statuses.some((s) => s === 'pending');
-  const allCooking = statuses.every((s) => s === 'cooking');
+  // "Listo" button: no pending items, but there are cooking items to finish
+  const showListo = !anyPending && statuses.some((s) => s === 'cooking');
 
   const handleAction = () => {
     if (anyPending) {
-      const pendingItems = group.items.filter((i) => i.status === 'pending');
-      onAction(pendingItems.map((i) => i.id), 'cooking', pendingItems[0].orderId);
-    } else if (allCooking) {
-      const cookingItems = group.items.filter((i) => i.status === 'cooking');
-      onAction(cookingItems.map((i) => i.id), 'ready', cookingItems[0].orderId);
+      const targets = group.items.filter((i) => i.status === 'pending');
+      onAction(targets.map((i) => i.id), 'cooking', uniqueOrderIds(targets));
+    } else if (showListo) {
+      const targets = group.items.filter((i) => i.status === 'cooking');
+      onAction(targets.map((i) => i.id), 'ready', uniqueOrderIds(targets));
     }
   };
 
@@ -92,7 +95,16 @@ export const ProductGroupRow = ({ group, checked, onCheckChange, onAction, isLoa
           ))}
         </Stack>
 
-        {!allReady && (
+        {allReady && (
+          <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5, color: 'success.main' }}>
+            <TaskAltIcon fontSize="small" />
+            <Typography variant="body2" sx={{ fontWeight: 600, color: 'success.main' }}>
+              Todo listo
+            </Typography>
+          </Stack>
+        )}
+
+        {!allReady && (anyPending || showListo) && (
           <Button
             variant="contained"
             size="large"
@@ -108,10 +120,6 @@ export const ProductGroupRow = ({ group, checked, onCheckChange, onAction, isLoa
               'Listo'
             )}
           </Button>
-        )}
-
-        {allReady && (
-          <Chip label="Todo listo" color="success" sx={{ minHeight: 36, px: 1 }} />
         )}
       </Stack>
     </Stack>

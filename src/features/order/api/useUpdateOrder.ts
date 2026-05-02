@@ -44,6 +44,15 @@ export const useUpdateOrder = () => {
         if (itemsError) throw itemsError;
       }
 
+      // Cascade: if order is set to cooking, all its items must become cooking too
+      if (orderHeader.order_status === 'cooking') {
+        await supabase
+          .from('order_items')
+          .update({ order_item_status: 'cooking' })
+          .eq('order_id', id)
+          .eq('order_item_status', 'pending');
+      }
+
       return orderData as Order;
     },
     onSuccess: (_, variables) => {

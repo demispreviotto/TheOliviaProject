@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Alert, Button, CircularProgress, Box } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { useKitchenDates } from './api/useKitchenDates';
@@ -43,10 +43,10 @@ export const KitchenPage = () => {
   }, []);
 
   const handleAction = useCallback(
-    async (itemIds: string[], newStatus: OrderItemStatus, orderId: string, groupKey?: string) => {
+    async (itemIds: string[], newStatus: OrderItemStatus, orderIds: string[], groupKey?: string) => {
       if (groupKey) setLoadingGroupKey(groupKey);
       try {
-        await updateStatus.mutateAsync({ itemIds, newStatus, orderId, date: selectedDate });
+        await updateStatus.mutateAsync({ itemIds, newStatus, orderIds, date: selectedDate });
         enqueueSnackbar(
           newStatus === 'cooking' ? 'Ítem(s) enviados a cocina' : 'Ítem(s) marcados como listos',
           { variant: 'success' },
@@ -60,15 +60,30 @@ export const KitchenPage = () => {
     [updateStatus, selectedDate, enqueueSnackbar],
   );
 
-  const selectedCookingItems = categories
-    .flatMap((cat) => cat.groups)
-    .filter((g) => selectedGroupKeys.has(g.key))
-    .flatMap((g) => g.items.filter((i) => i.status === 'cooking'));
+  // FAB logic: homogeneity check across ALL items in selected groups
+  const fabData = useMemo(() => {
+    const selectedItems = categories
+      .flatMap((cat) => cat.groups)
+      .filter((g) => selectedGroupKeys.has(g.key))
+      .flatMap((g) => g.items);
+
+    if (selectedItems.length === 0) return { targetStatus: null as OrderItemStatus | null, items: [] };
+
+    const allStatuses = new Set(selectedItems.map((i) => i.status));
+    if (allStatuses.size !== 1) return { targetStatus: null as OrderItemStatus | null, items: [] };
+
+    const sharedStatus = [...allStatuses][0] as OrderItemStatus;
+    const targetStatus: OrderItemStatus | null =
+      sharedStatus === 'pending' ? 'cooking' :
+      sharedStatus === 'cooking' ? 'ready' : null;
+
+    return { targetStatus, items: selectedItems };
+  }, [categories, selectedGroupKeys]);
 
   const handleFAB = async () => {
-    if (selectedCookingItems.length === 0) return;
-    const orderId = selectedCookingItems[0].orderId;
-    await handleAction(selectedCookingItems.map((i) => i.id), 'ready', orderId);
+    if (!fabData.targetStatus || fabData.items.length === 0) return;
+    const orderIds = [...new Set(fabData.items.map((i) => i.orderId))];
+    await handleAction(fabData.items.map((i) => i.id), fabData.targetStatus, orderIds);
     setSelectedGroupKeys(new Set());
   };
 
@@ -121,21 +136,21 @@ export const KitchenPage = () => {
         <CategoryAccordion
           key={cat.category}
           category={cat}
-          date={selectedDate}
           selectedGroupKeys={selectedGroupKeys}
           onGroupCheckChange={handleGroupCheckChange}
-          onAction={(itemIds, newStatus, orderId) => {
+          onAction={(itemIds, newStatus, orderIds) => {
             const group = cat.groups.find((g) =>
               g.items.some((i) => itemIds.includes(i.id)),
             );
-            handleAction(itemIds, newStatus, orderId, group?.key);
+            handleAction(itemIds, newStatus, orderIds, group?.key);
           }}
           loadingGroupKey={loadingGroupKey}
         />
       ))}
 
       <KitchenFAB
-        count={selectedCookingItems.length}
+        count={fabData.items.length}
+        targetStatus={fabData.targetStatus}
         isLoading={updateStatus.isPending}
         onClick={handleFAB}
       />

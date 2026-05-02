@@ -8,7 +8,8 @@
       "Bash(Select-Object Name, Mode)",
       "PowerShell(ls -Path \"C:\\\\Users\\\\emita\\\\Documents\\\\TheOliviaProject.Frontend\" -Directory | ForEach-Object { $_.Name })",
       "PowerShell(ls -Path \"C:\\\\Users\\\\emita\\\\Documents\\\\TheOliviaProject.Frontend\\\\src\\\\features\" -Directory | ForEach-Object { $_.Name })",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(npm run *)"
     ]
   }
 }

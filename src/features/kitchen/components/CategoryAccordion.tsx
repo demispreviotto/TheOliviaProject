@@ -10,16 +10,14 @@ import { ProductGroupRow } from './ProductGroupRow';
 
 interface Props {
   category: KitchenCategory;
-  date: string;
   selectedGroupKeys: Set<string>;
   onGroupCheckChange: (groupKey: string, checked: boolean) => void;
-  onAction: (itemIds: string[], newStatus: OrderItemStatus, orderId: string) => void;
+  onAction: (itemIds: string[], newStatus: OrderItemStatus, orderIds: string[]) => void;
   loadingGroupKey: string | null;
 }
 
 export const CategoryAccordion = ({
   category,
-  date,
   selectedGroupKeys,
   onGroupCheckChange,
   onAction,
@@ -44,7 +42,6 @@ export const CategoryAccordion = ({
           <ProductGroupRow
             key={group.key}
             group={group}
-            date={date}
             checked={selectedGroupKeys.has(group.key)}
             onCheckChange={(checked) => onGroupCheckChange(group.key, checked)}
             onAction={onAction}
