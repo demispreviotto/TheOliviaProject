@@ -3,7 +3,12 @@
     "allow": [
       "PowerShell(Get-ChildItem *)",
       "Bash(git checkout *)",
-      "Bash(git pull *)"
+      "Bash(git pull *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\emita\\\\Documents\\\\TheOliviaProject.Frontend\" -Force)",
+      "Bash(Select-Object Name, Mode)",
+      "PowerShell(ls -Path \"C:\\\\Users\\\\emita\\\\Documents\\\\TheOliviaProject.Frontend\" -Directory | ForEach-Object { $_.Name })",
+      "PowerShell(ls -Path \"C:\\\\Users\\\\emita\\\\Documents\\\\TheOliviaProject.Frontend\\\\src\\\\features\" -Directory | ForEach-Object { $_.Name })",
+      "Bash(npm install *)"
     ]
   }
 }

@@ -37,11 +37,17 @@ export const MainNavbar = () => {
         >
           Productos
         </S.NavButton>
-        <S.NavButton 
-          component={NavLink} 
+        <S.NavButton
+          component={NavLink}
           to="/pedidos"
         >
           Pedidos
+        </S.NavButton>
+        <S.NavButton
+          component={NavLink}
+          to="/cocina"
+        >
+          Cocina
         </S.NavButton>
         <S.LogoutButton 
           startIcon={<LogoutIcon />} 

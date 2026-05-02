@@ -2,6 +2,7 @@ import type { Customer } from "../../customers/api/customer.types";
 import type { Product } from "../../products/api/product.types";
 
 export type OrderStatus = 'pending' | 'cooking' | 'ready' | 'delivered' | 'cancelled';
+export type OrderItemStatus = 'pending' | 'cooking' | 'ready' | 'delivered' | 'cancelled';
 export type OrderDeliveryMode = 'pickup' | 'delivery';
 export type OrderPaymentState = 'pending' | 'partially_paid' | 'paid';
 export type OrderPaymentMethod = 'cash' | 'transfer' | 'mixed';
@@ -14,6 +15,7 @@ export interface OrderItem {
   unit_price: number;
   discount_amount: number;
   notes?: string | null;
+  order_item_status?: OrderItemStatus;
   products?: Product;
 }
 
