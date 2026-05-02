@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../api/supabase';
 import type { OrderItemStatus } from '../../order/api/order.types';
+import { calculateNewOrderStatus } from '../utils/kitchen.business';
 
 interface UpdateItemStatusArgs {
   itemIds: string[];
@@ -18,16 +19,15 @@ const syncOrderStatus = async (orderId: string) => {
   if (error) throw error;
 
   const statuses = (allItems ?? []).map((i) => i.order_item_status as OrderItemStatus);
-  const allReady = statuses.length > 0 && statuses.every((s) => s === 'ready');
-  const anyCooking = statuses.some((s) => s === 'cooking');
+  const newOrderStatus = calculateNewOrderStatus(statuses);
 
-  if (allReady) {
+  if (newOrderStatus === 'ready') {
     await supabase
       .from('orders')
       .update({ order_status: 'ready' })
       .eq('id', orderId)
       .not('order_status', 'in', '("delivered","cancelled")');
-  } else if (anyCooking) {
+  } else if (newOrderStatus === 'cooking') {
     await supabase
       .from('orders')
       .update({ order_status: 'cooking' })

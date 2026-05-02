@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import { computeFabData } from './utils/kitchen.business';
 import { Alert, Button, CircularProgress, Box } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { useKitchenDates } from './api/useKitchenDates';
@@ -60,25 +61,10 @@ export const KitchenPage = () => {
     [updateStatus, selectedDate, enqueueSnackbar],
   );
 
-  // FAB logic: homogeneity check across ALL items in selected groups
-  const fabData = useMemo(() => {
-    const selectedItems = categories
-      .flatMap((cat) => cat.groups)
-      .filter((g) => selectedGroupKeys.has(g.key))
-      .flatMap((g) => g.items);
-
-    if (selectedItems.length === 0) return { targetStatus: null as OrderItemStatus | null, items: [] };
-
-    const allStatuses = new Set(selectedItems.map((i) => i.status));
-    if (allStatuses.size !== 1) return { targetStatus: null as OrderItemStatus | null, items: [] };
-
-    const sharedStatus = [...allStatuses][0] as OrderItemStatus;
-    const targetStatus: OrderItemStatus | null =
-      sharedStatus === 'pending' ? 'cooking' :
-      sharedStatus === 'cooking' ? 'ready' : null;
-
-    return { targetStatus, items: selectedItems };
-  }, [categories, selectedGroupKeys]);
+  const fabData = useMemo(
+    () => computeFabData(categories, selectedGroupKeys),
+    [categories, selectedGroupKeys],
+  );
 
   const handleFAB = async () => {
     if (!fabData.targetStatus || fabData.items.length === 0) return;
