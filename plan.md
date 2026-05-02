@@ -107,7 +107,7 @@ Login (Supabase Auth)
 
 ## Módulos y fases
 
-### Fase 1: MVP — Operaciones Básicas ✅ (en curso)
+### Fase 1: MVP — Operaciones Básicas ✅ (completa)
 
 **Objetivo:** que el negocio pueda operar diariamente con el sistema.
 
@@ -115,9 +115,9 @@ Login (Supabase Auth)
 - [x] Gestión de Clientes (CRUD: particulares y mayoristas)
 - [x] Catálogo de Productos (CRUD con soft delete)
 - [x] Gestión de Pedidos (CRUD, estados, ítems, pagos mixtos)
-- [ ] Validaciones de formularios robustas (Zod schemas completos)
-- [ ] Feedback visual consistente (notistack en todas las operaciones)
-- [ ] Manejo de errores de red y estados vacíos
+- [x] Validaciones de formularios robustas (Zod schemas completos, superRefine para mayoristas)
+- [x] Feedback visual consistente (notistack en todas las operaciones + mensajes amigables via getErrorMessage)
+- [x] Manejo de errores de red y estados vacíos (isError + Alert con retry + EmptyState en las 3 tablas)
 
 ### Fase 2: Dashboards Operativos
 

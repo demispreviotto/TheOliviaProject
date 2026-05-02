@@ -37,7 +37,6 @@ export const isValidDNI = (dni: string): boolean => {
  */
 export const isValidTaxId = (taxId: string): boolean => {
   const clean = taxId.replace(/[^\d]/g, '');
-  console.log(`Debug: Longitud detectada: ${clean.length}`); // Esto te hubiera mostrado el "12"
   if (clean.length === 8) return isValidDNI(clean);
   if (clean.length === 11) return isValidCUIT(clean);
   return false;
