@@ -1,11 +1,12 @@
 // src/features/products/components/ProductTable.tsx
-import { 
-  Table, TableBody, TableCell, TableContainer, 
-  TableHead, TableRow, Paper, IconButton, Chip 
+import {
+  Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, Paper, IconButton, Chip
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import type { Product } from '../api/product.types';
+import { EmptyState } from '../../../components/ui/EmptyState';
 
 interface Props {
   products: Product[];
@@ -14,6 +15,8 @@ interface Props {
 }
 
 export const ProductTable = ({ products, onEdit, onView }: Props) => {
+  if (products.length === 0) return <EmptyState message="Todavía no hay productos en el catálogo." />;
+
   return (
     <TableContainer component={Paper} elevation={2}>
       <Table>

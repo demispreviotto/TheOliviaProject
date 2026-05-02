@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { 
- CircularProgress, Button, Dialog, DialogTitle, DialogContent, IconButton 
+import {
+  CircularProgress, Button, Alert, Dialog, DialogTitle, DialogContent, IconButton
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
@@ -10,12 +10,13 @@ import { useProducts } from './api/useProducts';
 import { useCreateProduct } from './api/useCreateProduct';
 import { useUpdateProduct } from './api/useUpdateProduct';
 import { useSnackbar } from 'notistack';
+import { getErrorMessage } from '../../utils/errorMessages';
 import type { Product } from './api/product.types';
-import * as S from '../customers/CustomersPage.styles'; // Reuse these generic header styles!
+import * as S from '../customers/CustomersPage.styles';
 
 export const ProductsPage = () => {
   const { enqueueSnackbar } = useSnackbar();
-  const { data: products, isLoading } = useProducts();
+  const { data: products, isLoading, isError, refetch } = useProducts();
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
 
@@ -42,33 +43,41 @@ export const ProductsPage = () => {
         enqueueSnackbar('Producto creado', { variant: 'success' });
       }
       handleClose();
-    } catch (error: any) {
-      enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
+    } catch (error: unknown) {
+      enqueueSnackbar(getErrorMessage(error), { variant: 'error' });
     }
+  };
+
+  const renderContent = () => {
+    if (isLoading) return <S.LoadingBox><CircularProgress /></S.LoadingBox>;
+    if (isError) return (
+      <Alert severity="error" action={<Button color="inherit" size="small" onClick={() => refetch()}>Reintentar</Button>}>
+        No se pudieron cargar los productos. Verificá tu conexión.
+      </Alert>
+    );
+    return (
+      <ProductTable
+        products={products || []}
+        onEdit={(p) => handleAction('edit', p)}
+        onView={(p) => handleAction('view', p)}
+      />
+    );
   };
 
   return (
     <S.PageRoot>
       <S.PageHeader direction="row">
         <S.PageTitle variant="h4">Productos</S.PageTitle>
-        <Button 
-          variant="contained" 
-          startIcon={<AddIcon />} 
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
           onClick={() => handleAction('create')}
         >
           Nuevo Producto
         </Button>
       </S.PageHeader>
 
-      {isLoading ? (
-        <S.LoadingBox><CircularProgress /></S.LoadingBox>
-      ) : (
-        <ProductTable 
-          products={products || []} 
-          onEdit={(p) => handleAction('edit', p)}
-          onView={(p) => handleAction('view', p)}
-        />
-      )}
+      {renderContent()}
 
       <Dialog open={!!modalMode} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

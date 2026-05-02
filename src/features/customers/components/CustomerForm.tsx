@@ -34,14 +34,18 @@ const schema = z.object({
   delivery_address: z.string().optional().nullable(),
   billing_address: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
-}).refine((data) => {
+}).superRefine((data, ctx) => {
   if (data.category === 'wholesale') {
-    return !!data.company_name && !!data.tax_id && !!data.billing_address;
+    if (!data.company_name) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'La razón social es obligatoria para mayoristas', path: ['company_name'] });
+    }
+    if (!data.tax_id) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'El CUIT es obligatorio para mayoristas', path: ['tax_id'] });
+    }
+    if (!data.billing_address) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'La dirección de facturación es obligatoria para mayoristas', path: ['billing_address'] });
+    }
   }
-  return true;
-}, {
-  message: "Los campos de empresa, CUIT y dirección de facturación son obligatorios para mayoristas",
-  path: ["company_name"], // We'll show the error general or specific
 });
 
 interface CustomerFormProps {

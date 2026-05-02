@@ -4,12 +4,12 @@
  */
 export const isValidCUIT = (cuit: string): boolean => {
   const cleanCuit = cuit.replace(/[^\d]/g, '');
-  
+
   if (cleanCuit.length !== 11) return false;
 
   const multipliers = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
   let sum = 0;
-  
+
   for (let i = 0; i < 10; i++) {
     sum += parseInt(cleanCuit[i]) * multipliers[i];
   }
@@ -37,6 +37,7 @@ export const isValidDNI = (dni: string): boolean => {
  */
 export const isValidTaxId = (taxId: string): boolean => {
   const clean = taxId.replace(/[^\d]/g, '');
+  console.log(`Debug: Longitud detectada: ${clean.length}`); // Esto te hubiera mostrado el "12"
   if (clean.length === 8) return isValidDNI(clean);
   if (clean.length === 11) return isValidCUIT(clean);
   return false;

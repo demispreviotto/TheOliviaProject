@@ -1,11 +1,12 @@
 // src/features/customers/components/CustomerTable.tsx
-import { 
-  Table, TableBody, TableCell, TableContainer, 
-  TableHead, TableRow, Paper, IconButton, Chip 
+import {
+  Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, Paper, IconButton, Chip
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import type { Customer } from '../api/customer.types';
+import { EmptyState } from '../../../components/ui/EmptyState';
 
 interface Props {
   customers: Customer[];
@@ -14,6 +15,8 @@ interface Props {
 }
 
 export const CustomerTable = ({ customers, onEdit, onView }: Props) => {
+  if (customers.length === 0) return <EmptyState message="Todavía no hay clientes cargados." />;
+
   return (
     <TableContainer component={Paper} elevation={2}>
       <Table>

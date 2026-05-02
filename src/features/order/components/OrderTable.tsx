@@ -1,11 +1,12 @@
-import { 
-  Table, TableBody, TableCell, TableContainer, 
-  TableHead, TableRow, Paper, IconButton, Chip 
+import {
+  Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, Paper, IconButton, Chip
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import type { Order } from '../api/order.types';
 import * as S from './OrderTable.styles';
+import { EmptyState } from '../../../components/ui/EmptyState';
 
 // Senior tip: Move config objects outside the component to prevent re-renders
 const statusConfig: Record<string, { label: string, color: "warning" | "info" | "secondary" | "success" | "error" | "default" }> = {
@@ -23,6 +24,8 @@ interface Props {
 }
 
 export const OrderTable = ({ orders, onEdit, onView }: Props) => {
+  if (orders.length === 0) return <EmptyState message="Todavía no hay pedidos registrados." />;
+
   return (
     <TableContainer component={Paper} elevation={2}>
       <Table>

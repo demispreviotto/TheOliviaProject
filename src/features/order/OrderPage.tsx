@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CircularProgress, Button, Dialog, DialogTitle, DialogContent, IconButton } from '@mui/material';
+import { CircularProgress, Button, Alert, Dialog, DialogTitle, DialogContent, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import { OrderTable } from './components/OrderTable';
@@ -8,13 +8,14 @@ import { useOrders } from './api/useOrders';
 import { useCreateOrder } from './api/useCreateOrder';
 import { useUpdateOrder } from './api/useUpdateOrder';
 import { useSnackbar } from 'notistack';
+import { getErrorMessage } from '../../utils/errorMessages';
 
 import type { Order } from './api/order.types';
 import * as S from '../customers/CustomersPage.styles';
 
 export const OrderPage = () => {
   const { enqueueSnackbar } = useSnackbar();
-  const { data: orders, isLoading } = useOrders();
+  const { data: orders, isLoading, isError, refetch } = useOrders();
   const createMutation = useCreateOrder();
   const updateMutation = useUpdateOrder();
 
@@ -41,33 +42,41 @@ export const OrderPage = () => {
         enqueueSnackbar('Pedido creado', { variant: 'success' });
       }
       handleClose();
-    } catch (error: any) {
-      enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
+    } catch (error: unknown) {
+      enqueueSnackbar(getErrorMessage(error), { variant: 'error' });
     }
+  };
+
+  const renderContent = () => {
+    if (isLoading) return <S.LoadingBox><CircularProgress /></S.LoadingBox>;
+    if (isError) return (
+      <Alert severity="error" action={<Button color="inherit" size="small" onClick={() => refetch()}>Reintentar</Button>}>
+        No se pudieron cargar los pedidos. Verificá tu conexión.
+      </Alert>
+    );
+    return (
+      <OrderTable
+        orders={orders || []}
+        onEdit={(o) => handleAction('edit', o)}
+        onView={(o) => handleAction('view', o)}
+      />
+    );
   };
 
   return (
     <S.PageRoot>
       <S.PageHeader direction="row">
         <S.PageTitle variant="h4">Pedidos</S.PageTitle>
-        <Button 
-          variant="contained" 
-          startIcon={<AddIcon />} 
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
           onClick={() => handleAction('create')}
         >
           Nuevo Pedido
         </Button>
       </S.PageHeader>
 
-      {isLoading ? (
-        <S.LoadingBox><CircularProgress /></S.LoadingBox>
-      ) : (
-        <OrderTable 
-          orders={orders || []} 
-          onEdit={(o) => handleAction('edit', o)}
-          onView={(o) => handleAction('view', o)}
-        />
-      )}
+      {renderContent()}
 
       <Dialog open={!!modalMode} onClose={handleClose} maxWidth="lg" fullWidth>
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
