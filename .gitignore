@@ -32,3 +32,4 @@ dist-ssr
 .temp
 supabase/.branches/
 supabase/.temp/
+products_import.sql
