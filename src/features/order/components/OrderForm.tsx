@@ -231,7 +231,7 @@ const processSubmit = (data: any) => {
 const productLabelConstructor = (option: any) => {
   if (!option?.product_category || !option?.variety) return 'Producto no disponible';
   const productName = `${option.product_category} ${option.variety}`;
-  const productPresentation = option?.unit === 1 ? option?.grams + 'g' : option?.units + 'u';
+  const productPresentation = option?.unit === 1 ? option?.grams + 'g' : option?.unit + 'u';
   return `${productName} - ${productPresentation}`;
 }
 

@@ -4,7 +4,7 @@ import { PRODUCT_CATEGORIES, type ProductType } from '../../products/api/product
 
 const getPresentationLabel = (product: any) => {
   if (product.grams) return `${product.grams}g`;
-  return `${product.units}u`;
+  return `${product.unit}u`;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

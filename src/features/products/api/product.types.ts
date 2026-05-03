@@ -19,7 +19,7 @@ export interface Product {
   id: string;
   variety: string;
   product_category: ProductType;
-  units: number;
+  unit: number;
   grams?: number | null;
   wholesale_price: number;
   retail_price: number;
