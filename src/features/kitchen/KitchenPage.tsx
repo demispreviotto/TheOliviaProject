@@ -1,7 +1,8 @@
-import { useState, useCallback, useMemo } from 'react';
-import { computeFabData } from './utils/kitchen.business';
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import { computeFabData } from './utils/kitchen.utils';
 import { Alert, Button, CircularProgress, Box } from '@mui/material';
 import { useSnackbar } from 'notistack';
+import { supabase } from '../../api/supabase';
 import { useKitchenDates } from './api/useKitchenDates';
 import { useKitchenDashboard } from './api/useKitchenDashboard';
 import { useUpdateItemStatus } from './api/useUpdateItemStatus';
@@ -24,6 +25,12 @@ export const KitchenPage = () => {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectedGroupKeys, setSelectedGroupKeys] = useState<Set<string>>(new Set());
   const [loadingGroupKey, setLoadingGroupKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.rpc('transition_items_to_cooking').then(({ error }) => {
+      if (error) console.error('transition_items_to_cooking:', error.message);
+    });
+  }, []);
 
   const { data: dates = [] } = useKitchenDates();
   const { data: categories = [], isLoading, isError, refetch } = useKitchenDashboard(selectedDate);

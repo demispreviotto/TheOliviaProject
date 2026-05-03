@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../api/supabase';
 import type { OrderItemStatus } from '../../order/api/order.types';
-import { calculateNewOrderStatus } from '../utils/kitchen.business';
+import { calculateNewOrderStatus } from '../utils/kitchen.utils';
 
 interface UpdateItemStatusArgs {
   itemIds: string[];
