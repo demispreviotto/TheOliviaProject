@@ -20,9 +20,14 @@ import type { Product, ProductType } from '../api/product.types';
 import * as S from './ProductForm.styles';
 
 const schema = z.object({
-  product_name: z.string().min(2, 'Nombre demasiado corto'),
-  product_category: z.enum(['pepas', 'budin', 'cookies', 'alfajores', 'pan', 'talitas', 'torta']),
+  variety: z.string().min(2, 'Nombre demasiado corto'),
+  product_category: z.enum([
+    'budin_integral', 'budin_avena', 'pepas', 'cookies', 'cookies_xl',
+    'galletitas', 'alfajores', 'pan', 'talitas', 'galleta_marinera', 'torta',
+  ]),
   presentation: z.string().optional().nullable(),
+  unit: z.coerce.number().min(1, 'La unidad debe ser al menos 1'),
+  grams: z.coerce.number().positive('Debe ser positivo').nullable().optional(),
   wholesale_price: z.coerce.number().min(0, 'El precio debe ser positivo'),
   retail_price: z.coerce.number().min(0, 'El precio debe ser positivo'),
   is_active: z.boolean().default(true),
@@ -45,9 +50,11 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
   } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
-      product_name: '',
+      variety: '',
       product_category: 'pepas' as ProductType,
       presentation: '',
+      unit: 1,
+      grams: null,
       wholesale_price: 0,
       retail_price: 0,
       is_active: true,
@@ -68,19 +75,19 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
       <form onSubmit={handleSubmit(onSubmit)}>
         <S.FormWrapper>
           <Grid container spacing={3}>
-            {/* Nombre */}
+            {/* Nombre / Variedad */}
             <Grid size={{ xs: 12, md: 8 }}>
               <Controller
-                name="product_name"
+                name="variety"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    label="Nombre del Producto"
+                    label="Variedad"
                     fullWidth
                     disabled={isReadOnly}
-                    error={!!errors.product_name}
-                    helperText={errors.product_name?.message}
+                    error={!!errors.variety}
+                    helperText={errors.variety?.message}
                   />
                 )}
               />
@@ -99,12 +106,16 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
                       label="Categoría"
                       {...field}
                     >
+                      <MenuItem value="budin_integral">Budín integral</MenuItem>
+                      <MenuItem value="budin_avena">Budín avena</MenuItem>
                       <MenuItem value="pepas">Pepas</MenuItem>
-                      <MenuItem value="budin">Budín</MenuItem>
                       <MenuItem value="cookies">Cookies</MenuItem>
+                      <MenuItem value="cookies_xl">Cookies XL</MenuItem>
+                      <MenuItem value="galletitas">Galletitas</MenuItem>
                       <MenuItem value="alfajores">Alfajores</MenuItem>
                       <MenuItem value="pan">Pan</MenuItem>
                       <MenuItem value="talitas">Talitas</MenuItem>
+                      <MenuItem value="galleta_marinera">Galleta marinera</MenuItem>
                       <MenuItem value="torta">Torta</MenuItem>
                     </Select>
                   )}
@@ -126,6 +137,45 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
                     disabled={isReadOnly}
                     error={!!errors.presentation}
                     helperText={errors.presentation?.message}
+                  />
+                )}
+              />
+            </Grid>
+
+            {/* Presentación numérica */}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Controller
+                name="unit"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Unidades por presentación"
+                    type="number"
+                    fullWidth
+                    disabled={isReadOnly}
+                    error={!!errors.unit}
+                    helperText={errors.unit?.message}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Controller
+                name="grams"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    value={field.value ?? ''}
+                    onChange={(e) => field.onChange(e.target.value === '' ? null : e.target.value)}
+                    label="Gramos por presentación (opcional)"
+                    type="number"
+                    fullWidth
+                    disabled={isReadOnly}
+                    error={!!errors.grams}
+                    helperText={errors.grams?.message}
                   />
                 )}
               />

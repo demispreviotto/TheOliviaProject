@@ -42,10 +42,10 @@ BEGIN
 
 
     -- 3. POBLAR PRODUCTOS
-    INSERT INTO public.products (id, product_name, product_category, presentation, wholesale_price, retail_price)
-    VALUES 
-    ('c3333333-3333-3333-3333-333333333333', 'Budín de Pera', 'budin', 'Grande 500g', 800.00, 1200.00),
-    ('d4444444-4444-4444-4444-444444444444', 'Pepas de Membrillo', 'pepas', 'Bolsa x 12 unidades', 500.00, 900.00)
+    INSERT INTO public.products (id, variety, product_category, presentation, unit, wholesale_price, retail_price)
+    VALUES
+    ('c3333333-3333-3333-3333-333333333333', 'Budín de Pera', 'budin_integral', 'Grande 500g', 1, 800.00, 1200.00),
+    ('d4444444-4444-4444-4444-444444444444', 'Pepas de Membrillo', 'pepas', 'Bolsa x 12 unidades', 12, 500.00, 900.00)
     ON CONFLICT (id) DO NOTHING;
 
 
