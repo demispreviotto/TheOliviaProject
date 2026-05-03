@@ -1,5 +1,5 @@
 // src/features/products/components/ProductForm.tsx
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -14,20 +14,17 @@ import {
   Grid,
   Box,
   Switch,
-  FormControlLabel
+  FormControlLabel,
+  InputAdornment
 } from '@mui/material';
-import type { Product, ProductType } from '../api/product.types';
+import { PRODUCT_CATEGORIES, CATEGORY_IDS, type Product, type ProductType } from '../api/product.types';
 import * as S from './ProductForm.styles';
 
 const schema = z.object({
-  variety: z.string().min(2, 'Nombre demasiado corto'),
-  product_category: z.enum([
-    'budin_integral', 'budin_avena', 'pepas', 'cookies', 'cookies_xl',
-    'galletitas', 'alfajores', 'pan', 'talitas', 'galleta_marinera', 'torta',
-  ]),
-  presentation: z.string().optional().nullable(),
-  unit: z.coerce.number().min(1, 'La unidad debe ser al menos 1'),
-  grams: z.coerce.number().positive('Debe ser positivo').nullable().optional(),
+  variety: z.string().min(1, 'Nombre demasiado corto'),
+  product_category: z.enum(CATEGORY_IDS),
+  units: z.coerce.number().min(1, 'Mínimo 1 unidad'),
+  grams: z.coerce.number().nullable(),
   wholesale_price: z.coerce.number().min(0, 'El precio debe ser positivo'),
   retail_price: z.coerce.number().min(0, 'El precio debe ser positivo'),
   is_active: z.boolean().default(true),
@@ -46,14 +43,14 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
       variety: '',
       product_category: 'pepas' as ProductType,
-      presentation: '',
-      unit: 1,
+      units: 1,
       grams: null,
       wholesale_price: 0,
       retail_price: 0,
@@ -61,38 +58,30 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
     },
   });
 
-  useEffect(() => {
+  const [isGramMode, setIsGramMode] = useState(false);
+
+useEffect(() => {
     if (initialData) {
-      reset({
-        ...initialData,
-        presentation: initialData.presentation || '',
-      });
+      reset(initialData);
+      setIsGramMode(!!initialData.grams);
     }
   }, [initialData, reset]);
+
+  const handleToggleMode = (checked: boolean) => {
+    setIsGramMode(checked);
+    if (checked) {
+      setValue('units', 1); // Set default unit when switching to grams
+    } else {
+      setValue('grams', null); // Clear grams when switching to units
+    }
+  };
 
   return (
 <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <S.FormWrapper>
           <Grid container spacing={3}>
-            {/* Nombre / Variedad */}
-            <Grid size={{ xs: 12, md: 8 }}>
-              <Controller
-                name="variety"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Variedad"
-                    fullWidth
-                    disabled={isReadOnly}
-                    error={!!errors.variety}
-                    helperText={errors.variety?.message}
-                  />
-                )}
-              />
-            </Grid>
-
+            
             {/* Categoría */}
             <Grid size={{ xs: 12, md: 4 }}>
               <FormControl fullWidth disabled={isReadOnly} error={!!errors.product_category}>
@@ -106,17 +95,11 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
                       label="Categoría"
                       {...field}
                     >
-                      <MenuItem value="budin_integral">Budín integral</MenuItem>
-                      <MenuItem value="budin_avena">Budín avena</MenuItem>
-                      <MenuItem value="pepas">Pepas</MenuItem>
-                      <MenuItem value="cookies">Cookies</MenuItem>
-                      <MenuItem value="cookies_xl">Cookies XL</MenuItem>
-                      <MenuItem value="galletitas">Galletitas</MenuItem>
-                      <MenuItem value="alfajores">Alfajores</MenuItem>
-                      <MenuItem value="pan">Pan</MenuItem>
-                      <MenuItem value="talitas">Talitas</MenuItem>
-                      <MenuItem value="galleta_marinera">Galleta marinera</MenuItem>
-                      <MenuItem value="torta">Torta</MenuItem>
+                      {PRODUCT_CATEGORIES.map((cat) => (
+                        <MenuItem key={cat.id} value={cat.id}>
+                          {cat.label}
+                        </MenuItem>
+                      ))}
                     </Select>
                   )}
                 />
@@ -124,62 +107,74 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
               </FormControl>
             </Grid>
 
-            {/* Presentación */}
-            <Grid size={{ xs: 12 }}>
+            {/* Nombre */}
+            <Grid size={{ xs: 12, md: 8 }}>
               <Controller
-                name="presentation"
+                name="variety"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    label="Presentación (ej: Bolsa x 12, Pote 500g)"
+                    label="Variedad: ej: de Membrillo, de Naranja, de Maicena"
                     fullWidth
                     disabled={isReadOnly}
-                    error={!!errors.presentation}
-                    helperText={errors.presentation?.message}
+                    error={!!errors.variety}
+                    helperText={errors.variety?.message}
                   />
                 )}
               />
             </Grid>
 
-            {/* Presentación numérica */}
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Controller
-                name="unit"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Unidades por presentación"
-                    type="number"
-                    fullWidth
+            {/* MODE SWITCHER */}
+          <Grid size={{xs:12}}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, bgcolor: 'action.hover', p: 1, borderRadius: 1 }}>
+              <FormControlLabel
+                control={
+                  <Switch 
+                    checked={isGramMode} 
+                    onChange={(e) => handleToggleMode(e.target.checked)} 
                     disabled={isReadOnly}
-                    error={!!errors.unit}
-                    helperText={errors.unit?.message}
                   />
-                )}
+                }
+                label={isGramMode ? "Venta por Peso (Gramos)" : "Venta por Unidad"}
               />
-            </Grid>
+            </Box>
+          </Grid>
 
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Controller
-                name="grams"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    value={field.value ?? ''}
-                    onChange={(e) => field.onChange(e.target.value === '' ? null : e.target.value)}
-                    label="Gramos por presentación (opcional)"
-                    type="number"
-                    fullWidth
-                    disabled={isReadOnly}
-                    error={!!errors.grams}
-                    helperText={errors.grams?.message}
-                  />
-                )}
-              />
-            </Grid>
+          {/* DYNAMIC INPUT */}
+          <Grid  size={{xs:12}}>
+            <Controller
+              name={isGramMode ? "grams" : "units"}
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  value={field.value ?? ''}
+                  label={isGramMode ? "Cantidad en Gramos" : "Cantidad de Unidades"}
+                  type="number"
+                  fullWidth
+                  disabled={isReadOnly}
+                  error={!!(isGramMode ? errors.grams : errors.units)}
+                  helperText={(isGramMode ? errors.grams : errors.units)?.message}
+                  // FIX: Use slotProps for modern MUI to avoid the InputProps type error
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Box sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                            {isGramMode ? '[g]' : '[u]'}
+                          </Box>
+                        </InputAdornment>
+                      ),
+                    }
+                  }}
+                />
+              )}
+            />
+            {isGramMode && (
+              <FormHelperText sx={{ ml: 2 }}>* Se registrará automáticamente como 1 unidad de X gramos.</FormHelperText>
+            )}
+          </Grid>
 
             {/* Precios */}
             <Grid size={{ xs: 12, md: 6 }}>

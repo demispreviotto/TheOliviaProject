@@ -229,10 +229,10 @@ const processSubmit = (data: any) => {
 };
 
 const productLabelConstructor = (option: any) => {
-  const productName = option.variety || 'Producto Desconocido';
-  const productCategory = option.product_category || '';
-  const productPresentation = option.presentation || '';
-  return `${productName} - ${productCategory} - ${productPresentation}`;
+  if (!option?.product_category || !option?.variety) return 'Producto no disponible';
+  const productName = `${option.product_category} ${option.variety}`;
+  const productPresentation = option?.unit === 1 ? option?.grams + 'g' : option?.units + 'u';
+  return `${productName} - ${productPresentation}`;
 }
 
 const calculatedTotal = useMemo(() => {
@@ -471,11 +471,7 @@ const calculatedTotal = useMemo(() => {
 
                     {/* Subtotal (Calculado) */}
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', pr: 1 }}>
-                      {/* <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        ${((watchItems[index]?.unit_price || 0) * (watchItems[index]?.quantity || 0) - (watchItems[index]?.discount_amount || 0)).toFixed(2)}
-                      </Typography> */}
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {/* Add a check for watchItems[index] to prevent crash on delete */}
                         ${((Number(watchItems[index]?.unit_price || 0) * Number(watchItems[index]?.quantity || 0)) - 
                             Number(watchItems[index]?.discount_amount || 0)).toFixed(2)}
                       </Typography>
@@ -536,7 +532,7 @@ const calculatedTotal = useMemo(() => {
                 {recommendations.map((rec: OrderItem) => (
                   <S.SuggestionChip
                     key={rec.product_id}
-                    label={`+ ${rec.products?.variety} (${rec.quantity})`}
+                    label={`+ ${rec.products?.product_category + ' ' + rec.products?.variety} (${rec.quantity})`}
                     onClick={() => handleQuickAdd(rec)}
                     size="small"
                     variant="outlined"
