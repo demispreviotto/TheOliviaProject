@@ -2,7 +2,7 @@ name: Vercel Production Deployment
 on:
   push:
     branches:
-      - main  # Only triggers when someone pushes to the main branch
+      - main
 
 jobs:
   deploy:
@@ -10,6 +10,15 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Debug Secrets Access
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "ERROR: VERCEL_TOKEN is empty for this user push!"
+            exit 1
+          else
+            echo "VERCEL_TOKEN is present."
+          fi
 
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v20
