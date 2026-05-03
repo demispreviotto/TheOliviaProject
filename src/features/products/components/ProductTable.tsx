@@ -21,7 +21,7 @@ export const ProductTable = ({ products, onEdit, onView }: Props) => {
     if (product.grams) {
       return `${product.grams}g`;
     }
-    return `${product.units}u`;
+    return `${product.unit}u`;
   };
 
   return (

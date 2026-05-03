@@ -23,7 +23,7 @@ import * as S from './ProductForm.styles';
 const schema = z.object({
   variety: z.string().min(1, 'Nombre demasiado corto'),
   product_category: z.enum(CATEGORY_IDS),
-  units: z.coerce.number().min(1, 'Mínimo 1 unidad'),
+  unit: z.coerce.number().min(1, 'Mínimo 1 unidad'),
   grams: z.coerce.number().nullable(),
   wholesale_price: z.coerce.number().min(0, 'El precio debe ser positivo'),
   retail_price: z.coerce.number().min(0, 'El precio debe ser positivo'),
@@ -50,7 +50,7 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
     defaultValues: {
       variety: '',
       product_category: 'pepas' as ProductType,
-      units: 1,
+      unit: 1,
       grams: null,
       wholesale_price: 0,
       retail_price: 0,
@@ -70,9 +70,9 @@ useEffect(() => {
   const handleToggleMode = (checked: boolean) => {
     setIsGramMode(checked);
     if (checked) {
-      setValue('units', 1); // Set default unit when switching to grams
+      setValue('unit', 1); // Set default unit when switching to grams
     } else {
-      setValue('grams', null); // Clear grams when switching to units
+      setValue('grams', null); // Clear grams when switching to unit
     }
   };
 
@@ -144,7 +144,7 @@ useEffect(() => {
           {/* DYNAMIC INPUT */}
           <Grid  size={{xs:12}}>
             <Controller
-              name={isGramMode ? "grams" : "units"}
+              name={isGramMode ? "grams" : "unit"}
               control={control}
               render={({ field }) => (
                 <TextField
@@ -154,9 +154,8 @@ useEffect(() => {
                   type="number"
                   fullWidth
                   disabled={isReadOnly}
-                  error={!!(isGramMode ? errors.grams : errors.units)}
-                  helperText={(isGramMode ? errors.grams : errors.units)?.message}
-                  // FIX: Use slotProps for modern MUI to avoid the InputProps type error
+                  error={!!(isGramMode ? errors.grams : errors.unit)}
+                  helperText={(isGramMode ? errors.grams : errors.unit)?.message}
                   slotProps={{
                     input: {
                       endAdornment: (
