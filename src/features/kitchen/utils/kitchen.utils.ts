@@ -1,6 +1,11 @@
 import type { KitchenCategory, KitchenProductGroup, KitchenRawItem } from '../api/kitchen.types';
 import type { OrderItemStatus } from '../../order/api/order.types';
-import type { ProductType } from '../../products/api/product.types';
+import { PRODUCT_CATEGORIES, type ProductType } from '../../products/api/product.types';
+
+const getPresentationLabel = (product: any) => {
+  if (product.grams) return `${product.grams}g`;
+  return `${product.units}u`;
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const aggregateKitchenData = (orders: any[]): KitchenCategory[] => {
@@ -12,7 +17,8 @@ export const aggregateKitchenData = (orders: any[]): KitchenCategory[] => {
       if (!product) continue;
 
       const category = product.product_category as ProductType;
-      const groupKey = `${product.variety}__${product.presentation ?? ''}`;
+      const presentationLabel = getPresentationLabel(product);
+      const groupKey = `${product.variety}__${presentationLabel}`;
 
       if (!categoryMap.has(category)) {
         categoryMap.set(category, new Map());
@@ -23,7 +29,7 @@ export const aggregateKitchenData = (orders: any[]): KitchenCategory[] => {
         groupMap.set(groupKey, {
           key: groupKey,
           productName: product.variety,
-          presentation: product.presentation ?? '',
+          presentation: presentationLabel,
           totalQuantity: 0,
           items: [],
         });
@@ -51,19 +57,10 @@ export const aggregateKitchenData = (orders: any[]): KitchenCategory[] => {
   return result.sort((a, b) => a.category.localeCompare(b.category));
 };
 
-export const CATEGORY_LABELS: Record<ProductType, string> = {
-  budin_integral: 'Budín integral',
-  budin_avena: 'Budín avena',
-  pepas: 'Pepas',
-  cookies: 'Cookies',
-  cookies_xl: 'Cookies XL',
-  galletitas: 'Galletitas',
-  alfajores: 'Alfajores',
-  pan: 'Pan',
-  talitas: 'Talitas',
-  galleta_marinera: 'Galleta marinera',
-  torta: 'Torta',
-};
+export const CATEGORY_LABELS = PRODUCT_CATEGORIES.reduce((acc, cat) => {
+  acc[cat.id] = cat.label;
+  return acc;
+}, {} as Record<ProductType, string>);
 
 export const STATUS_LABELS: Record<OrderItemStatus, string> = {
   pending: 'Pendiente',

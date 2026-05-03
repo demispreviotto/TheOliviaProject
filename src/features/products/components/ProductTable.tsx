@@ -16,6 +16,13 @@ interface Props {
 
 export const ProductTable = ({ products, onEdit, onView }: Props) => {
   if (products.length === 0) return <EmptyState message="Todavía no hay productos en el catálogo." />;
+  
+  const formatPresentation = (product: Product): string => {
+    if (product.grams) {
+      return `${product.grams}g`;
+    }
+    return `${product.units}u`;
+  };
 
   return (
     <TableContainer component={Paper} elevation={2}>
@@ -35,7 +42,7 @@ export const ProductTable = ({ products, onEdit, onView }: Props) => {
             <TableRow key={product.id} hover>
               <TableCell>
                 <div style={{ fontWeight: 500 }}>{product.variety}</div>
-                <div style={{ fontSize: '0.75rem', color: 'gray' }}>{product.presentation}</div>
+                <div style={{ fontSize: '0.75rem', color: 'gray' }}>{formatPresentation(product)}</div>
               </TableCell>
               <TableCell>
                 <Chip label={product.product_category} size="small" variant="outlined" />
