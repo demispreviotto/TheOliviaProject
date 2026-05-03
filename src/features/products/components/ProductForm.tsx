@@ -1,4 +1,3 @@
-// src/features/products/components/ProductForm.tsx
 import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -60,7 +59,7 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
 
   const [isGramMode, setIsGramMode] = useState(false);
 
-useEffect(() => {
+  useEffect(() => {
     if (initialData) {
       reset(initialData);
       setIsGramMode(!!initialData.grams);
