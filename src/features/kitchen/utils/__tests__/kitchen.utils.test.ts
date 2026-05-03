@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateNewOrderStatus, computeFabData } from '../kitchen.business';
+import { calculateNewOrderStatus, computeFabData } from '../kitchen.utils';
 import type { KitchenCategory } from '../../api/kitchen.types';
 import type { OrderItemStatus } from '../../../order/api/order.types';
 
