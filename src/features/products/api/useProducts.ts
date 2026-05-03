@@ -10,7 +10,7 @@ export const useProducts = () => {
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .order('product_name', { ascending: true });
+        .order('variety', { ascending: true });
 
       if (error) throw error;
       return data as Product[];

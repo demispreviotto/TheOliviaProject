@@ -34,7 +34,7 @@ export const ProductTable = ({ products, onEdit, onView }: Props) => {
           {products.map((product) => (
             <TableRow key={product.id} hover>
               <TableCell>
-                <div style={{ fontWeight: 500 }}>{product.product_name}</div>
+                <div style={{ fontWeight: 500 }}>{product.variety}</div>
                 <div style={{ fontSize: '0.75rem', color: 'gray' }}>{product.presentation}</div>
               </TableCell>
               <TableCell>

@@ -12,7 +12,7 @@ export const aggregateKitchenData = (orders: any[]): KitchenCategory[] => {
       if (!product) continue;
 
       const category = product.product_category as ProductType;
-      const groupKey = `${product.product_name}__${product.presentation ?? ''}`;
+      const groupKey = `${product.variety}__${product.presentation ?? ''}`;
 
       if (!categoryMap.has(category)) {
         categoryMap.set(category, new Map());
@@ -22,7 +22,7 @@ export const aggregateKitchenData = (orders: any[]): KitchenCategory[] => {
       if (!groupMap.has(groupKey)) {
         groupMap.set(groupKey, {
           key: groupKey,
-          productName: product.product_name,
+          productName: product.variety,
           presentation: product.presentation ?? '',
           totalQuantity: 0,
           items: [],
@@ -52,12 +52,16 @@ export const aggregateKitchenData = (orders: any[]): KitchenCategory[] => {
 };
 
 export const CATEGORY_LABELS: Record<ProductType, string> = {
+  budin_integral: 'Budín integral',
+  budin_avena: 'Budín avena',
   pepas: 'Pepas',
-  budin: 'Budín',
   cookies: 'Cookies',
+  cookies_xl: 'Cookies XL',
+  galletitas: 'Galletitas',
   alfajores: 'Alfajores',
   pan: 'Pan',
   talitas: 'Talitas',
+  galleta_marinera: 'Galleta marinera',
   torta: 'Torta',
 };
 

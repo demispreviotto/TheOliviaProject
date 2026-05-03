@@ -1,11 +1,24 @@
 // src/features/products/api/product.types.ts
-export type ProductType = 'pepas' | 'budin' | 'cookies' | 'alfajores' | 'pan' | 'talitas' | 'torta';
+export type ProductType =
+  | 'budin_integral'
+  | 'budin_avena'
+  | 'pepas'
+  | 'cookies'
+  | 'cookies_xl'
+  | 'galletitas'
+  | 'alfajores'
+  | 'pan'
+  | 'talitas'
+  | 'galleta_marinera'
+  | 'torta';
 
 export interface Product {
   id: string;
-  product_name: string;
+  variety: string;
   product_category: ProductType;
   presentation?: string | null;
+  unit: number;
+  grams?: number | null;
   wholesale_price: number;
   retail_price: number;
   is_active: boolean;

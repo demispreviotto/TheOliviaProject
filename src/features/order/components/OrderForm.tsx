@@ -229,7 +229,7 @@ const processSubmit = (data: any) => {
 };
 
 const productLabelConstructor = (option: any) => {
-  const productName = option.product_name || 'Producto Desconocido';
+  const productName = option.variety || 'Producto Desconocido';
   const productCategory = option.product_category || '';
   const productPresentation = option.presentation || '';
   return `${productName} - ${productCategory} - ${productPresentation}`;
@@ -536,7 +536,7 @@ const calculatedTotal = useMemo(() => {
                 {recommendations.map((rec: OrderItem) => (
                   <S.SuggestionChip
                     key={rec.product_id}
-                    label={`+ ${rec.products?.product_name} (${rec.quantity})`}
+                    label={`+ ${rec.products?.variety} (${rec.quantity})`}
                     onClick={() => handleQuickAdd(rec)}
                     size="small"
                     variant="outlined"
