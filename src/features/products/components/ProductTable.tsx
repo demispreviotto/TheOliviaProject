@@ -1,12 +1,12 @@
-// src/features/products/components/ProductTable.tsx
 import {
   Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Paper, IconButton, Chip
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import type { Product } from '../api/product.types';
+import { type Product } from '../api/product.types';
 import { EmptyState } from '../../../components/ui/EmptyState';
+import { categoryLabelMap, formatPresentation } from '../utils/products.utils';
 
 interface Props {
   products: Product[];
@@ -16,13 +16,6 @@ interface Props {
 
 export const ProductTable = ({ products, onEdit, onView }: Props) => {
   if (products.length === 0) return <EmptyState message="Todavía no hay productos en el catálogo." />;
-  
-  const formatPresentation = (product: Product): string => {
-    if (product.grams) {
-      return `${product.grams}g`;
-    }
-    return `${product.unit}u`;
-  };
 
   return (
     <TableContainer component={Paper} elevation={2}>
@@ -45,7 +38,7 @@ export const ProductTable = ({ products, onEdit, onView }: Props) => {
                 <div style={{ fontSize: '0.75rem', color: 'gray' }}>{formatPresentation(product)}</div>
               </TableCell>
               <TableCell>
-                <Chip label={product.product_category} size="small" variant="outlined" />
+                {categoryLabelMap[product.product_category] || product.product_category}
               </TableCell>
               <TableCell>${product.retail_price}</TableCell>
               <TableCell>${product.wholesale_price}</TableCell>

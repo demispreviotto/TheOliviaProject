@@ -25,6 +25,7 @@ import { useCustomers } from '../../customers/api/useCustomers';
 import { useProducts } from '../../products/api/useProducts';
 import { MaskedInput } from '../../../components/ui/MaskedInput';
 import { useCustomerHistory } from '../api/useCustomerHistory';
+import { categoryLabelMap, getFullProductName } from '../../products/utils/products.utils';
 
 const itemSchema = z.object({
   id: z.string().optional(),
@@ -111,13 +112,12 @@ export const OrderForm = ({ initialData, onSubmit, isLoading, isReadOnly=false, 
     name: "order_items",
   });
 
-  // const watchItems = watch("order_items");
   const watchItems = useWatch({
     control,
     name: "order_items",
     defaultValue: [],
   });
-  // const watchCustomerId = watch("customer_id");
+
   const watchCustomerId = useWatch({
     control,
     name: "customer_id",
@@ -227,13 +227,6 @@ const processSubmit = (data: any) => {
     order_items: cleanedItems
   });
 };
-
-const productLabelConstructor = (option: any) => {
-  if (!option?.product_category || !option?.variety) return 'Producto no disponible';
-  const productName = `${option.product_category} ${option.variety}`;
-  const productPresentation = option?.unit === 1 ? option?.grams + 'g' : option?.unit + 'u';
-  return `${productName} - ${productPresentation}`;
-}
 
 const calculatedTotal = useMemo(() => {
     return (watchItems || []).reduce((acc, item) => {
@@ -387,7 +380,7 @@ const calculatedTotal = useMemo(() => {
                           <Autocomplete
                             size="small"
                             options={products}
-                            getOptionLabel={(option) => productLabelConstructor(option)}
+                            getOptionLabel={(option) => getFullProductName(option)}
                             value={products.find(p => p.id === value) || null}
                             onChange={(_, newValue) => handleProductChange(index, newValue?.id || '')}
                             disabled={isReadOnly || !watchCustomerId}
@@ -532,7 +525,7 @@ const calculatedTotal = useMemo(() => {
                 {recommendations.map((rec: OrderItem) => (
                   <S.SuggestionChip
                     key={rec.product_id}
-                    label={`+ ${rec.products?.product_category + ' ' + rec.products?.variety} (${rec.quantity})`}
+                    label={`+ ${categoryLabelMap[rec.products?.product_category || '']} ${rec.products?.variety} (${rec.quantity})`}
                     onClick={() => handleQuickAdd(rec)}
                     size="small"
                     variant="outlined"
