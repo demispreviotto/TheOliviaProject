@@ -1,0 +1,45 @@
+product_category,variety,unit,grams,retail_price,wholesale_price,
+Budín integral,Pera con chocolate,,540,8400,7170
+Budín integral,Pera con chocolate,,360,,4770
+Budín integral,Cítrico con frutos secos,,540,8400,7170
+Budín integral,Cítrico con frutos secos,,360,,4770
+Budín integral,Zanahoria con nuez,,540,8400,7170
+Budín integral,Zanahoria con nuez,,360,,4770
+Budín integral,Limón con frutos rojos,,570,8400,7170
+Budín integral,Limón con frutos rojos,,360,,4770
+Budín integral,"Banana, almendras y chips",,570,8400,7170
+Budín integral,"Banana, almendras y chips",,360,,4770
+Budín integral,Manzana con frutos secos,,570,8400,7170
+Budín integral,Manzana con frutos secos,,360,,4770
+Budín integral,"Naranja, castañas y arándanos",,570,8400,7170
+Budín integral,"Naranja, castañas y arándanos",,360,,4770
+Budín integral,Varios,,570,,7170
+Budín integral,Varios,,360,,4770
+Budín avena,Manzana y nuez,,570,6400,4770
+Budín avena,Chips de chocolate,,360,6400,4770
+Budín avena,Naranja y frutas secas,,570,6400,4770
+Budín avena,Arándanos y chocolate blanco,,360,6400,4770
+Pepas,Membrillo,10,,4050,3450
+Pepas,Membrillo,5,,,1750
+Pepas,Batata,10,,4050,3450
+Pepas,Batata,5,,,1750
+Pepas,Dulce de leche,10,,4050,3450
+Pepas,Dulce de leche,5,,,1750
+Cookies,Chips,10,,4050,3450
+Cookies,Chips,5,,,1750
+Galletitas,Algarroba y naranja,10,,4050,3450
+Galletitas,Algarroba y naranja,5,,,1750
+Galletitas,Limón,10,,4050,3450
+Galletitas,Limón,5,,,1750
+Cookies XL,Chocolate y nuez,2,,,2700
+Cookies XL,Chocolate y nuez,4,,5600,
+Cookies XL,Frutos secos,2,,,2700
+Cookies XL,Frutos secos,4,,5600,
+Alfajores,Algarroba y almendras,2,,,2860
+Alfajores,Algarroba y almendras,4,,6300,
+Alfajores,Nuez,2,,,2860
+Alfajores,Nuez,4,,6300,
+Pan,Multisemillas,,800,6300,4100
+Talitas,Talitas,,120,4000,2950
+Galleta marinera,Galleta marinera,,120,4000,2950
+Torta,Avena,,,,3740
