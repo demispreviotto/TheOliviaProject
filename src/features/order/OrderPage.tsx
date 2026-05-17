@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { CircularProgress, Button, Alert, Dialog, DialogTitle, DialogContent, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
+import EditIcon from '@mui/icons-material/Edit';
 import { OrderTable } from './components/OrderTable';
 import { OrderForm } from './components/OrderForm';
 import { useOrders } from './api/useOrders';
@@ -32,6 +33,14 @@ export const OrderPage = () => {
     setSelectedOrder(null);
   };
 
+  const handleCancelForm = () => {
+    if (selectedOrder && modalMode === 'edit') {
+      setModalMode('view');
+    } else {
+      handleClose();
+    }
+  };
+
   const handleFormSubmit = async (data: any) => {
     try {
       if (selectedOrder) {
@@ -57,7 +66,6 @@ export const OrderPage = () => {
     return (
       <OrderTable
         orders={orders || []}
-        onEdit={(o) => handleAction('edit', o)}
         onView={(o) => handleAction('view', o)}
       />
     );
@@ -81,13 +89,26 @@ export const OrderPage = () => {
       <Dialog open={!!modalMode} onClose={handleClose} maxWidth="lg" fullWidth>
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           {modalMode === 'view' ? 'Resumen de Pedido' : modalMode === 'edit' ? 'Editar Pedido' : 'Nuevo Pedido'}
-          <IconButton onClick={handleClose}><CloseIcon /></IconButton>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {modalMode === 'view' && (
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<EditIcon />}
+                onClick={() => setModalMode('edit')}
+              >
+                Editar
+              </Button>
+            )}
+            <IconButton onClick={handleClose}><CloseIcon /></IconButton>
+          </div>
         </DialogTitle>
         <DialogContent dividers>
-          <OrderForm 
+          <OrderForm
+            key={modalMode ?? 'create'}
             initialData={selectedOrder}
             onSubmit={handleFormSubmit}
-            onCancel={handleClose}
+            onCancel={handleCancelForm}
             isLoading={createMutation.isPending || updateMutation.isPending}
             isReadOnly={modalMode === 'view'}
           />

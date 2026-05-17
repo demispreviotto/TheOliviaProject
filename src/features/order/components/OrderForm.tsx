@@ -78,7 +78,7 @@ const ALLOWED_STATUS_TRANSITIONS: Record<string, string[]> = {
   cancelled: ['cancelled'],
 };
 
-export const OrderForm = ({ initialData, onSubmit, isLoading, isReadOnly=false,  }: OrderFormProps) => {
+export const OrderForm = ({ initialData, onSubmit, onCancel, isLoading, isReadOnly=false }: OrderFormProps) => {
   const { data: customers = [] } = useCustomers();
   const { data: products = [] } = useProducts();
   
@@ -610,8 +610,8 @@ const calculatedTotal = useMemo(() => {
           {(!isReadOnly) && (
             <>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-              <Button variant="outlined" onClick={() => reset()} disabled={isLoading}>
-                Limpiar
+              <Button variant="outlined" onClick={initialData ? onCancel : () => reset()} disabled={isLoading}>
+                {initialData ? 'Cancelar' : 'Limpiar'}
               </Button>
               <Button 
                 type="submit" 

@@ -4,6 +4,7 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
+import EditIcon from '@mui/icons-material/Edit';
 import { ProductTable } from './components/ProductTable';
 import { ProductForm } from './components/ProductForm';
 import { useProducts } from './api/useProducts';
@@ -33,6 +34,14 @@ export const ProductsPage = () => {
     setSelectedProduct(null);
   };
 
+  const handleCancelForm = () => {
+    if (selectedProduct && modalMode === 'edit') {
+      setModalMode('view');
+    } else {
+      handleClose();
+    }
+  };
+
   const handleFormSubmit = async (data: any) => {
     try {
       if (selectedProduct) {
@@ -58,7 +67,6 @@ export const ProductsPage = () => {
     return (
       <ProductTable
         products={products || []}
-        onEdit={(p) => handleAction('edit', p)}
         onView={(p) => handleAction('view', p)}
       />
     );
@@ -82,13 +90,26 @@ export const ProductsPage = () => {
       <Dialog open={!!modalMode} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           {modalMode === 'view' ? 'Detalles del Producto' : modalMode === 'edit' ? 'Editar Producto' : 'Nuevo Producto'}
-          <IconButton onClick={handleClose}><CloseIcon /></IconButton>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {modalMode === 'view' && (
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<EditIcon />}
+                onClick={() => setModalMode('edit')}
+              >
+                Editar
+              </Button>
+            )}
+            <IconButton onClick={handleClose}><CloseIcon /></IconButton>
+          </div>
         </DialogTitle>
         <DialogContent dividers>
-          <ProductForm 
+          <ProductForm
+            key={modalMode ?? 'create'}
             initialData={selectedProduct}
             onSubmit={handleFormSubmit}
-            onCancel={handleClose}
+            onCancel={handleCancelForm}
             isLoading={createMutation.isPending || updateMutation.isPending}
             isReadOnly={modalMode === 'view'}
           />

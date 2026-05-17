@@ -1,11 +1,12 @@
 // src/features/customers/CustomersPage.tsx
 import { useState } from 'react';
 import {
- Button, CircularProgress, Alert,
+  Button, CircularProgress, Alert,
   Dialog, DialogContent, DialogTitle, IconButton
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
+import EditIcon from '@mui/icons-material/Edit';
 import { CustomerForm } from './components/CustomerForm';
 import { CustomerTable } from './components/CustomerTable';
 import { useCustomers } from './api/useCustomers';
@@ -21,7 +22,7 @@ export const CustomersPage = () => {
   const { data: customers, isLoading: isTableLoading, isError, refetch } = useCustomers();
   const createMutation = useCreateCustomer();
   const updateMutation = useUpdateCustomer();
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view' | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -36,6 +37,14 @@ export const CustomersPage = () => {
     setIsModalOpen(false);
     setModalMode(null);
     setSelectedCustomer(null);
+  };
+
+  const handleCancelForm = () => {
+    if (selectedCustomer && modalMode === 'edit') {
+      setModalMode('view');
+    } else {
+      handleClose();
+    }
   };
 
   const getTitle = () => {
@@ -69,7 +78,6 @@ export const CustomersPage = () => {
     return (
       <CustomerTable
         customers={customers || []}
-        onEdit={(c) => handleAction('edit', c)}
         onView={(c) => handleAction('view', c)}
       />
     );
@@ -90,18 +98,30 @@ export const CustomersPage = () => {
 
       {renderContent()}
 
-      {/* Shared Create/Edit Modal */}
       <Dialog open={isModalOpen} onClose={handleClose} maxWidth="md" fullWidth>
         <DialogTitle sx={{ m: 0, p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-{getTitle()}
-          <IconButton onClick={handleClose}><CloseIcon /></IconButton>
+          {getTitle()}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {modalMode === 'view' && (
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<EditIcon />}
+                onClick={() => setModalMode('edit')}
+              >
+                Editar
+              </Button>
+            )}
+            <IconButton onClick={handleClose}><CloseIcon /></IconButton>
+          </div>
         </DialogTitle>
         <DialogContent dividers>
-          <CustomerForm 
-initialData={selectedCustomer}
+          <CustomerForm
+            key={modalMode ?? 'create'}
+            initialData={selectedCustomer}
             onSubmit={handleFormSubmit}
             isLoading={createMutation.isPending || updateMutation.isPending}
-            onCancel={handleClose}
+            onCancel={handleCancelForm}
             isReadOnly={modalMode === 'view'}
           />
         </DialogContent>

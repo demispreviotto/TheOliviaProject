@@ -10,7 +10,8 @@
       "PowerShell(ls -Path \"C:\\\\Users\\\\emita\\\\Documents\\\\TheOliviaProject.Frontend\\\\src\\\\features\" -Directory | ForEach-Object { $_.Name })",
       "Bash(npm install *)",
       "Bash(npm run *)",
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\emita\\\\Documents\\\\TheOliviaProject.Frontend\\\\src\" -Recurse -Directory | ForEach-Object { $_.FullName } | Sort-Object)"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\emita\\\\Documents\\\\TheOliviaProject.Frontend\\\\src\" -Recurse -Directory | ForEach-Object { $_.FullName } | Sort-Object)",
+      "Bash(Get-ChildItem *)"
     ]
   }
 }
