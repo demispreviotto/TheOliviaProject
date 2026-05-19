@@ -4,6 +4,7 @@ import {
   TableHead, TableRow, Paper, Chip
 } from '@mui/material';
 import type { Customer } from '../api/customer.types';
+import { CATEGORY_LABELS } from '../utils/customerMappings';
 import { EmptyState } from '../../../components/ui/EmptyState';
 
 interface Props {
@@ -36,7 +37,7 @@ export const CustomerTable = ({ customers, onView }: Props) => {
               <TableCell>{customer.full_name}</TableCell>
               <TableCell>
                 <Chip
-                  label={customer.category === 'wholesale' ? 'Mayorista' : 'Individual'}
+                  label={CATEGORY_LABELS[customer.category]}
                   color={customer.category === 'wholesale' ? 'secondary' : 'default'}
                   size="small"
                 />

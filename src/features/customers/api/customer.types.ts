@@ -1,8 +1,15 @@
 export type CustomerCategory = 'individual' | 'wholesale';
 
+export type TaxStatus =
+  'final_consumer' |
+  'simplified_taxpayer' |
+  'registered_responsible' |
+  'exempt';
+
 export interface Customer {
   id: string;
   category: CustomerCategory;
+  tax_status: TaxStatus;
   full_name: string;
   company_name?: string | null;
   tax_id?: string | null;
