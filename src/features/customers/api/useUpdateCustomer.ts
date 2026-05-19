@@ -1,4 +1,3 @@
-// src/features/customers/api/useUpdateCustomer.ts
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../api/supabase';
 import type { UpdateCustomerInput, Customer } from './customer.types';

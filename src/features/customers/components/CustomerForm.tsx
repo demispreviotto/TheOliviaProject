@@ -1,28 +1,31 @@
-// src/features/customers/components/CustomerForm.tsx
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useEffect } from 'react';
-import { 
-  TextField, 
-  Button, 
-  MenuItem, 
-  FormControl, 
-  InputLabel, 
-  Select, 
+import {
+  TextField,
+  Button,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
   FormHelperText,
   Divider,
   Grid,
-  Box
+  Box,
 } from '@mui/material';
 import * as S from './CustomerForm.styles';
 import type { Customer } from '../api/customer.types';
+import { CATEGORY_LABELS, TAX_STATUS_LABELS, getDefaultTaxStatus } from '../utils/customerMappings';
 import { isValidTaxId } from '../../../utils/validators';
 import { MaskedInput } from '../../../components/ui/MaskedInput';
 import { normalizePhone } from '../../../utils/formatters';
 
+const TAX_STATUS_VALUES = ['final_consumer', 'simplified_taxpayer', 'registered_responsible', 'exempt'] as const;
+
 const schema = z.object({
   category: z.enum(['individual', 'wholesale']),
+  tax_status: z.enum(TAX_STATUS_VALUES),
   full_name: z.string().min(3, 'El nombre es obligatorio (min 3 caracteres)'),
   company_name: z.string().optional().nullable(),
   tax_id: z.string().optional().nullable().refine((val) => {
@@ -36,6 +39,13 @@ const schema = z.object({
   notes: z.string().optional().nullable(),
 }).superRefine((data, ctx) => {
   if (data.category === 'wholesale') {
+    if (data.tax_status === 'final_consumer') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Los mayoristas no pueden ser Consumidor Final',
+        path: ['tax_status'],
+      });
+    }
     if (!data.company_name) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'La razón social es obligatoria para mayoristas', path: ['company_name'] });
     }
@@ -56,17 +66,19 @@ interface CustomerFormProps {
   isReadOnly?: boolean;
 }
 
-export const CustomerForm = ({ initialData, onSubmit, onCancel, isLoading, isReadOnly= false }: CustomerFormProps) => {
+export const CustomerForm = ({ initialData, onSubmit, onCancel, isLoading, isReadOnly = false }: CustomerFormProps) => {
   const {
     control,
     handleSubmit,
     watch,
     reset,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
-      category: 'individual',
+      category: 'individual' as const,
+      tax_status: 'final_consumer' as const,
       full_name: '',
       company_name: '',
       tax_id: '',
@@ -84,6 +96,7 @@ export const CustomerForm = ({ initialData, onSubmit, onCancel, isLoading, isRea
     if (initialData) {
       reset({
         ...initialData,
+        tax_status: initialData.tax_status ?? 'final_consumer',
         company_name: initialData.company_name || '',
         tax_id: initialData.tax_id || '',
         phone: initialData.phone || '',
@@ -95,8 +108,16 @@ export const CustomerForm = ({ initialData, onSubmit, onCancel, isLoading, isRea
     }
   }, [initialData, reset]);
 
+  // Auto-switch tax_status to the appropriate default when category changes.
+  const isFirstRender = initialData == null;
+  useEffect(() => {
+    if (isFirstRender) {
+      setValue('tax_status', getDefaultTaxStatus(category));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category]);
+
   const onFormSubmit = (data: any) => {
-    // Normalizar teléfono antes de enviar
     const normalizedData = {
       ...data,
       phone: data.phone ? normalizePhone(data.phone) : null,
@@ -109,6 +130,7 @@ export const CustomerForm = ({ initialData, onSubmit, onCancel, isLoading, isRea
       <form onSubmit={handleSubmit(onFormSubmit)}>
         <S.FormWrapper>
           <Grid container spacing={2}>
+            {/* Categoría */}
             <Grid size={{ xs: 12, md: 6 }}>
               <FormControl fullWidth error={!!errors.category} disabled={isReadOnly}>
                 <InputLabel id="category-label">Categoría</InputLabel>
@@ -116,17 +138,33 @@ export const CustomerForm = ({ initialData, onSubmit, onCancel, isLoading, isRea
                   name="category"
                   control={control}
                   render={({ field }) => (
-                    <Select
-                      labelId="category-label"
-                      label="Categoría"
-                      {...field}
-                    >
-                      <MenuItem value="individual">Individual</MenuItem>
-                      <MenuItem value="wholesale">Mayorista</MenuItem>
+                    <Select labelId="category-label" label="Categoría" {...field}>
+                      {(Object.entries(CATEGORY_LABELS) as [keyof typeof CATEGORY_LABELS, string][]).map(([value, label]) => (
+                        <MenuItem key={value} value={value}>{label}</MenuItem>
+                      ))}
                     </Select>
                   )}
                 />
                 <FormHelperText>{errors.category?.message}</FormHelperText>
+              </FormControl>
+            </Grid>
+
+            {/* Condición Impositiva */}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <FormControl fullWidth error={!!errors.tax_status} disabled={isReadOnly}>
+                <InputLabel id="tax-status-label">Condición Impositiva</InputLabel>
+                <Controller
+                  name="tax_status"
+                  control={control}
+                  render={({ field }) => (
+                    <Select labelId="tax-status-label" label="Condición Impositiva" {...field}>
+                      {(Object.entries(TAX_STATUS_LABELS) as [keyof typeof TAX_STATUS_LABELS, string][]).map(([value, label]) => (
+                        <MenuItem key={value} value={value}>{label}</MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+                <FormHelperText>{errors.tax_status?.message}</FormHelperText>
               </FormControl>
             </Grid>
 
@@ -212,7 +250,7 @@ export const CustomerForm = ({ initialData, onSubmit, onCancel, isLoading, isRea
                 <Grid size={{ xs: 12 }}>
                   <Divider sx={{ my: 2 }}>Datos de Empresa</Divider>
                 </Grid>
-                
+
                 <Grid size={{ xs: 12, md: 6 }}>
                   <Controller
                     name="company_name"
@@ -241,8 +279,8 @@ export const CustomerForm = ({ initialData, onSubmit, onCancel, isLoading, isRea
                         fullWidth
                         disabled={isReadOnly}
                         mask={[
-                          { mask: '00000000' }, // DNI
-                          { mask: '00-00000000-0' } // CUIT
+                          { mask: '00000000' },
+                          { mask: '00-00000000-0' }
                         ]}
                         error={!!errors.tax_id}
                         helperText={errors.tax_id?.message || '8 dígitos para DNI, 11 para CUIT'}
@@ -288,28 +326,21 @@ export const CustomerForm = ({ initialData, onSubmit, onCancel, isLoading, isRea
               />
             </Grid>
 
-            {/* Botón de envío */}
-{!isReadOnly && (
-            <Grid size={{ xs: 12 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-                <Button variant="outlined" onClick={onCancel} disabled={isLoading}>
-                Cancelar
-              </Button>
-                <Button 
-                  type="submit" 
-                  variant="contained" 
-                  color="primary" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Guardando...' : (initialData ? 'Actualizar' : 'Guardar')}
-                </Button>
-              </Box>
-            </Grid>
-)}
+            {!isReadOnly && (
+              <Grid size={{ xs: 12 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+                  <Button variant="outlined" onClick={onCancel} disabled={isLoading}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit" variant="contained" color="primary" disabled={isLoading}>
+                    {isLoading ? 'Guardando...' : (initialData ? 'Actualizar' : 'Guardar')}
+                  </Button>
+                </Box>
+              </Grid>
+            )}
           </Grid>
         </S.FormWrapper>
       </form>
-    {/* </S.FormContainer> */}
     </>
   );
 };

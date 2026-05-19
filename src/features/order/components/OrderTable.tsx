@@ -50,7 +50,7 @@ export const OrderTable = ({ orders, onView }: Props) => {
                 </TableCell>
 
                 <TableCell>
-                  {order.customer?.company_name || order.customer?.full_name || 'Cliente no encontrado'}
+                  {order.customer?.full_name || order.customer?.company_name || 'Cliente no encontrado'}
                 </TableCell>
 
                 <TableCell>
