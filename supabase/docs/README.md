@@ -141,3 +141,28 @@ Correct Deployment Order:
 - Then git push: Update the code that will use those new features.
 - Rule of thumb: If you deploy code that looks for a table that hasn't been created yet with db push, the app will crash. Infrastructure first, Code second.
 
+
+# CLAUDE COMMENTS
+La regla de oro es:
+
+  Nunca toques el esquema directamente en remoto (ni desde Supabase Studio, ni corriendo SQL a mano). Todo cambio de schema debe seguir este flujo:
+
+  1. Crear el archivo .sql en supabase/migrations/
+  2. npx supabase db push
+
+  Lo que te pasó esta vez fue exactamente eso — corriste SQL directo en remoto para arreglar la función, y el CLI no se enteró. El historial quedó desincronizado.
+
+  ---
+  Si por alguna razón ya tocaste algo en remoto, el flujo de rescate es:
+
+  npx supabase db pull        # baja el schema actual del remoto
+  npx supabase db push        # pushea lo que quede pendiente
+
+  Pero db pull sobreescribe tu schema local, así que si tenés migraciones pendientes sin aplicar es un lío. Por eso lo mejor es nunca llegar a ese punto.
+
+  ---
+  Regla práctica para este proyecto:
+
+  - Supabase Studio (local en localhost:54323) → para explorar datos, testear queries, debuggear. OK.
+  - Supabase Studio (remoto en supabase.com) → solo para leer. Nunca modificar schema desde ahí.
+  - Cualquier cambio de schema → archivo en supabase/migrations/ → db push. Siempre.
