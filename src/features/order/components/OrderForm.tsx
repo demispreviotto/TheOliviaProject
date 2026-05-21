@@ -2,13 +2,13 @@ import { useForm, Controller, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useEffect, useMemo, useState } from 'react';
-import { 
-  TextField, 
-  Button, 
-  MenuItem, 
-  FormControl, 
-  InputLabel, 
-  Select, 
+import {
+  TextField,
+  Button,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
   Typography,
   Grid,
   Box,
@@ -71,23 +71,22 @@ const toISODate = (displayDate: string) => {
 };
 
 const ALLOWED_STATUS_TRANSITIONS: Record<string, string[]> = {
-  pending:   ['pending', 'cooking', 'cancelled'],
-  cooking:   ['cooking', 'cancelled'],
-  ready:     ['ready', 'delivered', 'cancelled'],
+  pending: ['pending', 'cooking', 'cancelled'],
+  cooking: ['cooking', 'cancelled'],
+  ready: ['ready', 'delivered', 'cancelled'],
   delivered: ['delivered'],
   cancelled: ['cancelled'],
 };
 
-export const OrderForm = ({ initialData, onSubmit, onCancel, isLoading, isReadOnly=false }: OrderFormProps) => {
+export const OrderForm = ({ initialData, onSubmit, onCancel, isLoading, isReadOnly = false }: OrderFormProps) => {
   const { data: customers = [] } = useCustomers();
   const { data: products = [] } = useProducts();
-  
+
   const [visibleNotes, setVisibleNotes] = useState<Record<number, boolean>>({});
 
   const {
     control,
     handleSubmit,
-    // watch,
     setValue,
     reset,
     formState: { errors },
@@ -122,8 +121,8 @@ export const OrderForm = ({ initialData, onSubmit, onCancel, isLoading, isReadOn
     control,
     name: "customer_id",
   });
-  const selectedCustomer = useMemo(() => 
-    customers.find(c => c.id === watchCustomerId), 
+  const selectedCustomer = useMemo(() =>
+    customers.find(c => c.id === watchCustomerId),
     [customers, watchCustomerId]
   );
   const { data: lastOrder } = useCustomerHistory(watchCustomerId);
@@ -135,7 +134,7 @@ export const OrderForm = ({ initialData, onSubmit, onCancel, isLoading, isReadOn
         ...initialData,
         pay_method: initialData.pay_method || null,
         order_items: (initialData.order_items || []).map(item => ({
-  id: item.id, 
+          id: item.id,
           product_id: item.product_id,
           quantity: item.quantity,
           unit_price: item.unit_price,
@@ -165,10 +164,10 @@ export const OrderForm = ({ initialData, onSubmit, onCancel, isLoading, isReadOn
   const handleProductChange = (index: number, productId: string) => {
     const product = products.find(p => p.id === productId);
     if (product) {
-      const price = selectedCustomer?.category === 'wholesale' 
-        ? product.wholesale_price 
+      const price = selectedCustomer?.category === 'wholesale'
+        ? product.wholesale_price
         : product.retail_price;
-      
+
       // We use shouldDirty: true to ensure the form state knows it changed
       setValue(`order_items.${index}.unit_price`, price, { shouldDirty: true });
       setValue(`order_items.${index}.product_id`, productId, { shouldDirty: true });
@@ -185,50 +184,50 @@ export const OrderForm = ({ initialData, onSubmit, onCancel, isLoading, isReadOn
   };
 
   const recommendations = useMemo(() => {
-  if (!lastOrder?.order_items) return [];
-  const currentProductIds = watchItems.map(item => item.product_id);
-  return lastOrder.order_items
-    .filter((item: OrderItem) => !currentProductIds.includes(item.product_id))
-    .sort((a: OrderItem, b: OrderItem) => b.quantity - a.quantity)
-    .slice(0, 2);
-}, [lastOrder, watchItems]);
+    if (!lastOrder?.order_items) return [];
+    const currentProductIds = watchItems.map(item => item.product_id);
+    return lastOrder.order_items
+      .filter((item: OrderItem) => !currentProductIds.includes(item.product_id))
+      .sort((a: OrderItem, b: OrderItem) => b.quantity - a.quantity)
+      .slice(0, 2);
+  }, [lastOrder, watchItems]);
 
-const handleQuickAdd = (recItem: any) => {
-  const product = products.find(p => p.id === recItem.product_id);
-  if (product) {
-    append({
-      product_id: product.id,
-      quantity: recItem.quantity,
-      unit_price: selectedCustomer?.category === 'wholesale' 
-        ? product.wholesale_price 
-        : product.retail_price,
-      discount_amount: 0,
-      notes: '',
+  const handleQuickAdd = (recItem: any) => {
+    const product = products.find(p => p.id === recItem.product_id);
+    if (product) {
+      append({
+        product_id: product.id,
+        quantity: recItem.quantity,
+        unit_price: selectedCustomer?.category === 'wholesale'
+          ? product.wholesale_price
+          : product.retail_price,
+        discount_amount: 0,
+        notes: '',
+      });
+    }
+  };
+
+  const processSubmit = (data: any) => {
+    const finalTotal = data.order_items.reduce((acc: number, item: any) => {
+      return acc + (Number(item.unit_price) * Number(item.quantity)) - Number(item.discount_amount || 0);
+    }, 0);
+
+    const cleanedItems = data.order_items.map((item: any) => ({
+      product_id: item.product_id,
+      quantity: Number(item.quantity),
+      unit_price: Number(item.unit_price),
+      discount_amount: Number(item.discount_amount),
+      notes: item.notes || '',
+    }));
+
+    onSubmit({
+      ...data,
+      total_price: finalTotal,
+      order_items: cleanedItems
     });
-  }
-};
+  };
 
-const processSubmit = (data: any) => {
-  const finalTotal = data.order_items.reduce((acc: number, item: any) => {
-    return acc + (Number(item.unit_price) * Number(item.quantity)) - Number(item.discount_amount || 0);
-  }, 0);
-
-  const cleanedItems = data.order_items.map((item: any) => ({
-    product_id: item.product_id,
-    quantity: Number(item.quantity),
-    unit_price: Number(item.unit_price),
-    discount_amount: Number(item.discount_amount),
-    notes: item.notes || '',
-  }));
-
-  onSubmit({
-    ...data,
-    total_price: finalTotal,
-    order_items: cleanedItems
-  });
-};
-
-const calculatedTotal = useMemo(() => {
+  const calculatedTotal = useMemo(() => {
     return (watchItems || []).reduce((acc, item) => {
       const price = Number(item?.unit_price || 0);
       const qty = Number(item?.quantity || 0);
@@ -359,7 +358,7 @@ const calculatedTotal = useMemo(() => {
             <S.ItemsHeader>
               <Typography variant="h6">Productos del Pedido</Typography>
             </S.ItemsHeader>
-            
+
             {errors.order_items && (
               <Typography color="error" variant="caption" sx={{ display: 'block', mb: 2 }}>
                 {errors.order_items.root?.message || "Revise los productos"}
@@ -452,8 +451,8 @@ const calculatedTotal = useMemo(() => {
 
                     {/* Botón Nota */}
                     <Box disable-style-alias="true">
-                      <IconButton 
-                        size="small" 
+                      <IconButton
+                        size="small"
                         onClick={() => toggleNote(index)}
                         color={watchItems[index]?.notes ? "primary" : "default"}
                         disabled={isReadOnly}
@@ -465,17 +464,17 @@ const calculatedTotal = useMemo(() => {
                     {/* Subtotal (Calculado) */}
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', pr: 1 }}>
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        ${((Number(watchItems[index]?.unit_price || 0) * Number(watchItems[index]?.quantity || 0)) - 
-                            Number(watchItems[index]?.discount_amount || 0)).toFixed(2)}
+                        ${((Number(watchItems[index]?.unit_price || 0) * Number(watchItems[index]?.quantity || 0)) -
+                          Number(watchItems[index]?.discount_amount || 0)).toFixed(2)}
                       </Typography>
                     </Box>
 
                     {/* Eliminar */}
                     {!isReadOnly && (
                       <IconButton color="error" onClick={() => remove(index)} size="small">
-                        <DeleteIcon fontSize="small"/>
+                        <DeleteIcon fontSize="small" />
                       </IconButton>
-                  )}
+                    )}
                   </S.ItemRow>
 
                   {/* Campo de Nota (Condicional) */}
@@ -505,8 +504,8 @@ const calculatedTotal = useMemo(() => {
             {/* Nuevo Botón Agregar Producto al final de la lista */}
             {!isReadOnly && (
               <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                <Button 
-                  startIcon={<AddCircleOutlinedIcon />} 
+                <Button
+                  startIcon={<AddCircleOutlinedIcon />}
                   onClick={handleAddItem}
                   variant="outlined"
                   color="primary">
@@ -515,86 +514,86 @@ const calculatedTotal = useMemo(() => {
               </Box>
             )}
 
-          {/* Recommendations Section */}
-          {!isReadOnly && recommendations.length > 0 && (
-            <S.RecommendationsWrapper>
-              <Typography variant="caption" color="text.secondary">
-                Sugeridos del pedido anterior:
-              </Typography>
-              <Stack direction="row" spacing={1}>
-                {recommendations.map((rec: OrderItem) => (
-                  <S.SuggestionChip
-                    key={rec.product_id}
-                    label={`+ ${categoryLabelMap[rec.products?.product_category || '']} ${rec.products?.variety} (${rec.quantity})`}
-                    onClick={() => handleQuickAdd(rec)}
-                    size="small"
-                    variant="outlined"
-                    color="primary"
-                  />
-                ))}
-              </Stack>
-            </S.RecommendationsWrapper>
-      )}
-        </Box>
+            {/* Recommendations Section */}
+            {!isReadOnly && recommendations.length > 0 && (
+              <S.RecommendationsWrapper>
+                <Typography variant="caption" color="text.secondary">
+                  Sugeridos del pedido anterior:
+                </Typography>
+                <Stack direction="row" spacing={1}>
+                  {recommendations.map((rec: OrderItem) => (
+                    <S.SuggestionChip
+                      key={rec.product_id}
+                      label={`+ ${categoryLabelMap[rec.products?.product_category || '']} ${rec.products?.variety} (${rec.quantity})`}
+                      onClick={() => handleQuickAdd(rec)}
+                      size="small"
+                      variant="outlined"
+                      color="primary"
+                    />
+                  ))}
+                </Stack>
+              </S.RecommendationsWrapper>
+            )}
+          </Box>
           <S.TotalContainer elevation={0} variant="outlined">
             <Grid container spacing={3}>
               <Grid size={{ xs: 12, md: 6 }}>
-                 <Typography variant="subtitle2" gutterBottom>Detalles de Pago</Typography>
-                 <Grid container spacing={2}>
-                    <Grid size={{ xs: 6 }}>
-                      <Controller
-                        name="transfer_amount"
-                        control={control}
-                        disabled={isReadOnly}
-                        render={({ field }) => (
-                          <TextField
-                            {...field}
-                            size="small"
-                            type="number"
-                            label="Monto Transfer"
-                            fullWidth
-                            onFocus={handleFocus}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                          />
-                        )}
-                      />
-                    </Grid>
-                    <Grid size={{ xs: 6 }}>
-                      <Controller
-                        name="cash_amount"
-                        control={control}
-                        disabled={isReadOnly}
-                        render={({ field }) => (
-                          <TextField
-                            {...field}
-                            size="small"
-                            type="number"
-                            label="Monto Efectivo"
-                            fullWidth
-                            onFocus={handleFocus}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                          />
-                        )}
-                      />
-                    </Grid>
-                    <Grid size={{ xs: 12 }}>
-                      <FormControl fullWidth size="small">
-                        <InputLabel>Método de Pago</InputLabel>
-                        <Controller
-                          name="pay_method"
-                          control={control}
-                          disabled={isReadOnly}
-                          render={({ field }) => (
-                            <Select {...field} label="Método de Pago">
-                              <MenuItem value="cash">Efectivo</MenuItem>
-                              <MenuItem value="transfer">Transferencia</MenuItem>
-                              <MenuItem value="mixed">Mixto</MenuItem>
-                            </Select>
-                          )}
+                <Typography variant="subtitle2" gutterBottom>Detalles de Pago</Typography>
+                <Grid container spacing={2}>
+                  <Grid size={{ xs: 6 }}>
+                    <Controller
+                      name="transfer_amount"
+                      control={control}
+                      disabled={isReadOnly}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          size="small"
+                          type="number"
+                          label="Monto Transfer"
+                          fullWidth
+                          onFocus={handleFocus}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
                         />
-                      </FormControl>
-                    </Grid>
-                 </Grid>
+                      )}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 6 }}>
+                    <Controller
+                      name="cash_amount"
+                      control={control}
+                      disabled={isReadOnly}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          size="small"
+                          type="number"
+                          label="Monto Efectivo"
+                          fullWidth
+                          onFocus={handleFocus}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      )}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12 }}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Método de Pago</InputLabel>
+                      <Controller
+                        name="pay_method"
+                        control={control}
+                        disabled={isReadOnly}
+                        render={({ field }) => (
+                          <Select {...field} label="Método de Pago">
+                            <MenuItem value="cash">Efectivo</MenuItem>
+                            <MenuItem value="transfer">Transferencia</MenuItem>
+                            <MenuItem value="mixed">Mixto</MenuItem>
+                          </Select>
+                        )}
+                      />
+                    </FormControl>
+                  </Grid>
+                </Grid>
               </Grid>
               <Grid size={{ xs: 12, md: 6 }} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 <S.SummaryRow>
@@ -609,22 +608,22 @@ const calculatedTotal = useMemo(() => {
 
           {(!isReadOnly) && (
             <>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-              <Button variant="outlined" onClick={initialData ? onCancel : () => reset()} disabled={isLoading}>
-                {initialData ? 'Cancelar' : 'Limpiar'}
-              </Button>
-              <Button 
-                type="submit" 
-                variant="contained" 
-                color="primary" 
-                size="large"
-                disabled={isLoading || watchItems.length === 0}
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+                <Button variant="outlined" onClick={initialData ? onCancel : () => reset()} disabled={isLoading}>
+                  {initialData ? 'Cancelar' : 'Limpiar'}
+                </Button>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  disabled={isLoading || watchItems.length === 0}
                 >
-              {isLoading ? 'Guardando...' : (initialData ? 'Actualizar Pedido' : 'Confirmar Pedido')}
-            </Button>
-          </Box>
-              </>
-         )}
+                  {isLoading ? 'Guardando...' : (initialData ? 'Actualizar Pedido' : 'Confirmar Pedido')}
+                </Button>
+              </Box>
+            </>
+          )}
         </S.FormWrapper>
       </form>
     </>

@@ -1,10 +1,14 @@
 import { useState } from 'react';
-import { CircularProgress, Button, Alert, Dialog, DialogTitle, DialogContent, IconButton } from '@mui/material';
+import { CircularProgress, Button, Alert, Dialog, DialogTitle, DialogContent, IconButton, Tooltip } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import EditIcon from '@mui/icons-material/Edit';
+import PrintIcon from '@mui/icons-material/Print';
+import ShareIcon from '@mui/icons-material/Share';
 import { OrderTable } from './components/OrderTable';
 import { OrderForm } from './components/OrderForm';
+import { OrderRemito, getRemitoElementId } from './components/OrderRemito';
+import { generateRemitoPdf } from './utils/generateRemitoPdf';
 import { useOrders } from './api/useOrders';
 import { useCreateOrder } from './api/useCreateOrder';
 import { useUpdateOrder } from './api/useUpdateOrder';
@@ -22,6 +26,35 @@ export const OrderPage = () => {
 
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view' | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
+
+  const canSharePdf = (): boolean => {
+    if (!navigator.canShare) return false;
+    try {
+      return navigator.canShare({ files: [new File([''], 'test.pdf', { type: 'application/pdf' })] });
+    } catch {
+      return false;
+    }
+  };
+
+  const handleShare = async () => {
+    if (!selectedOrder) return;
+    setIsSharing(true);
+    try {
+      const file = await generateRemitoPdf(getRemitoElementId(selectedOrder.id), selectedOrder.id);
+      await navigator.share({
+        files: [file],
+        title: 'Remito de Pedido',
+        text: 'Adjuntamos el remito digital de su pedido.',
+      });
+    } catch (err) {
+      if (err instanceof Error && err.name !== 'AbortError') {
+        enqueueSnackbar('No se pudo compartir el remito.', { variant: 'error' });
+      }
+    } finally {
+      setIsSharing(false);
+    }
+  };
 
   const handleAction = (mode: 'create' | 'edit' | 'view', order?: Order) => {
     setSelectedOrder(order || null);
@@ -86,19 +119,46 @@ export const OrderPage = () => {
 
       {renderContent()}
 
+      {modalMode === 'view' && selectedOrder && (
+        <OrderRemito order={selectedOrder} />
+      )}
+
       <Dialog open={!!modalMode} onClose={handleClose} maxWidth="lg" fullWidth>
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           {modalMode === 'view' ? 'Resumen de Pedido' : modalMode === 'edit' ? 'Editar Pedido' : 'Nuevo Pedido'}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {modalMode === 'view' && (
-              <Button
-                size="small"
-                variant="outlined"
-                startIcon={<EditIcon />}
-                onClick={() => setModalMode('edit')}
-              >
-                Editar
-              </Button>
+              <>
+                <Tooltip title={canSharePdf() ? '' : 'Compartir nativo no disponible en este navegador'}>
+                  <span>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={isSharing ? <CircularProgress size={14} /> : <ShareIcon />}
+                      onClick={handleShare}
+                      disabled={!canSharePdf() || isSharing}
+                    >
+                      {isSharing ? 'Generando PDF...' : 'Compartir'}
+                    </Button>
+                  </span>
+                </Tooltip>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<PrintIcon />}
+                  onClick={() => window.print()}
+                >
+                  Imprimir Remito
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<EditIcon />}
+                  onClick={() => setModalMode('edit')}
+                >
+                  Editar
+                </Button>
+              </>
             )}
             <IconButton onClick={handleClose}><CloseIcon /></IconButton>
           </div>

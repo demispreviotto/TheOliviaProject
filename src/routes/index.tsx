@@ -5,6 +5,7 @@ import { HomePage } from '../features/dashboard/HomePage';
 import { ProductsPage } from '../features/products/ProductsPage';
 import { CustomersPage } from '../features/customers/CustomersPage';
 import { OrderPage } from '../features/order/OrderPage';
+import { RemitoPreviewPage } from '../features/order/RemitoPreviewPage';
 import { KitchenPage } from '../features/kitchen/KitchenPage';
 import { ProtectedLayout } from '../layouts/ProtectedLayout';
 import type { JSX } from 'react';
@@ -26,6 +27,9 @@ export const AppRouter = () => {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Dev-only preview routes — no auth required */}
+        <Route path="/dev/remito" element={<RemitoPreviewPage />} />
+
         {/* Public Routes with Guard */}
         <Route
           path="/login"
