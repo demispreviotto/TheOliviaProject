@@ -1,10 +1,10 @@
-import { styled, alpha } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 import { Box, Typography } from '@mui/material';
 
 // ── Page wrapper ─────────────────────────────────────────────────────────────
 // Background is always applied (not only inside @media print) so the dev
 // preview route at /dev/remito also shows the dot pattern on screen.
-export const PrintWrapper = styled(Box)(({ theme }) => ({
+export const PrintWrapper = styled(Box)({
   // backgroundImage: `radial-gradient(circle, ${alpha(theme.palette.primary.main, 0.28)} 1.5px, transparent 1.5px)`,
   backgroundSize: '22px 22px',
   // Force the browser to render the background when printing
@@ -28,7 +28,7 @@ export const PrintWrapper = styled(Box)(({ theme }) => ({
     fontFamily: '"Helvetica Neue", Arial, sans-serif',
     color: '#000',
   },
-}));
+});
 
 // ── Header — 3-column grid ────────────────────────────────────────────────────
 export const HeaderGrid = styled(Box)(({ theme }) => ({
