@@ -13,3 +13,17 @@ export const cleanNumericString = (str: string): string => {
 export const normalizePhone = (phone: string): string => {
   return cleanNumericString(phone);
 };
+
+export const formatDate = (dateStr: string): string => {
+  const datePart = dateStr.split('T')[0];
+  const [year, month, day] = datePart.split('-');
+  return `${day}/${month}/${year}`;
+};
+
+export const formatCurrency = (value: number): string =>
+  new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(value);

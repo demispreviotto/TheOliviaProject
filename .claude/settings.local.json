@@ -11,7 +11,8 @@
       "Bash(npm install *)",
       "Bash(npm run *)",
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\emita\\\\Documents\\\\TheOliviaProject.Frontend\\\\src\" -Recurse -Directory | ForEach-Object { $_.FullName } | Sort-Object)",
-      "Bash(Get-ChildItem *)"
+      "Bash(Get-ChildItem *)",
+      "Bash(npx tsc *)"
     ]
   }
 }

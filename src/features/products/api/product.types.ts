@@ -8,7 +8,8 @@ export const PRODUCT_CATEGORIES = [
   { id: 'alfajores', label: 'Alfajores' },
   { id: 'pan', label: 'Pan' },
   { id: 'talitas', label: 'Talitas' },
-  { id: 'galleta_marinera', label: 'Galleta Marinera' },
+  { id: 'galleta_marinera', label: 'Galletas Marineras' },
+  { id: 'galletitas', label: 'Galletitas' },
   { id: 'torta', label: 'Torta' },
 ] as const;
 
