@@ -9,12 +9,13 @@ export async function generateRemitoPdf(elementId: string, orderId: string): Pro
   // can measure and render the layout. Positioned off-screen to avoid flash.
   const savedStyle = el.getAttribute('style') ?? '';
   el.style.setProperty('display', 'block', 'important');
-  el.style.setProperty('position', 'absolute', 'important');
-  el.style.setProperty('top', '-99999px', 'important');
+  // fixed (not absolute) so position is viewport-relative — more reliable on mobile
+  el.style.setProperty('position', 'fixed', 'important');
+  el.style.setProperty('top', '-9999px', 'important');
   el.style.setProperty('left', '0', 'important');
   el.style.setProperty('width', '794px', 'important');
   el.style.setProperty('background-color', '#ffffff', 'important');
-  el.style.setProperty('z-index', '-1', 'important');
+  el.style.setProperty('z-index', '-9999', 'important');
 
   try {
     const canvas = await html2canvas(el, {
