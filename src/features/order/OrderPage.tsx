@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { CircularProgress, Button, Alert, Dialog, DialogTitle, DialogContent, IconButton, Tooltip } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
@@ -26,34 +26,54 @@ export const OrderPage = () => {
 
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view' | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [isSharing, setIsSharing] = useState(false);
+  const [remitoFile, setRemitoFile] = useState<File | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const canSharePdf = (): boolean => {
+  const shareSupported = useMemo(() => {
     if (!navigator.canShare) return false;
     try {
       return navigator.canShare({ files: [new File([''], 'test.pdf', { type: 'application/pdf' })] });
     } catch {
       return false;
     }
-  };
+  }, []);
 
-  const handleShare = async () => {
-    if (!selectedOrder) return;
-    setIsSharing(true);
-    try {
-      const file = await generateRemitoPdf(getRemitoElementId(selectedOrder.id), selectedOrder.id);
-      await navigator.share({
-        files: [file],
-        title: 'Remito de Pedido',
-        text: 'Adjuntamos el remito digital de su pedido.',
-      });
-    } catch (err) {
+  // Pre-generate the PDF as soon as the view modal renders the Remito element.
+  // The 300 ms delay gives React time to mount and paint the hidden element before
+  // html2canvas tries to measure it.
+  useEffect(() => {
+    if (modalMode !== 'view' || !selectedOrder || !shareSupported) return;
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      setIsGenerating(true);
+      try {
+        const file = await generateRemitoPdf(getRemitoElementId(selectedOrder.id), selectedOrder.id);
+        if (!cancelled) setRemitoFile(file);
+      } catch {
+        // Non-critical — share button stays disabled if generation fails
+      } finally {
+        if (!cancelled) setIsGenerating(false);
+      }
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [modalMode, selectedOrder, shareSupported]);
+
+  // navigator.share() MUST be called synchronously within the tap-event task.
+  // No await before it — the pre-generated file is already in state.
+  const handleShare = () => {
+    if (!remitoFile) return;
+    navigator.share({
+      files: [remitoFile],
+      title: 'Remito de Pedido',
+      text: 'Adjuntamos el remito digital de su pedido.',
+    }).catch((err: unknown) => {
       if (err instanceof Error && err.name !== 'AbortError') {
         enqueueSnackbar('No se pudo compartir el remito.', { variant: 'error' });
       }
-    } finally {
-      setIsSharing(false);
-    }
+    });
   };
 
   const handleAction = (mode: 'create' | 'edit' | 'view', order?: Order) => {
@@ -64,6 +84,7 @@ export const OrderPage = () => {
   const handleClose = () => {
     setModalMode(null);
     setSelectedOrder(null);
+    setRemitoFile(null);
   };
 
   const handleCancelForm = () => {
@@ -129,16 +150,16 @@ export const OrderPage = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {modalMode === 'view' && (
               <>
-                <Tooltip title={canSharePdf() ? '' : 'Compartir nativo no disponible en este navegador'}>
+                <Tooltip title={!shareSupported ? 'Compartir nativo no disponible en este navegador' : ''}>
                   <span>
                     <Button
                       size="small"
                       variant="outlined"
-                      startIcon={isSharing ? <CircularProgress size={14} /> : <ShareIcon />}
+                      startIcon={isGenerating ? <CircularProgress size={14} /> : <ShareIcon />}
                       onClick={handleShare}
-                      disabled={!canSharePdf() || isSharing}
+                      disabled={!shareSupported || !remitoFile || isGenerating}
                     >
-                      {isSharing ? 'Generando PDF...' : 'Compartir'}
+                      {isGenerating ? 'Preparando...' : 'Compartir'}
                     </Button>
                   </span>
                 </Tooltip>
