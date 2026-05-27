@@ -14,6 +14,10 @@
 | Backend / DB / Auth | Supabase (PostgreSQL + Auth) |
 | Notificaciones | notistack |
 | Máscaras de input | react-imask |
+| PDF | jspdf v4 + jspdf-autotable v5 + html2canvas v1 |
+| Calendario | react-day-picker v9 |
+| Gestos táctiles | react-swipeable v7 |
+| Testing | Vitest v4 + Testing Library React v16 |
 
 **Puerto de desarrollo:** `localhost:5173` (Vite default)  
 **Supabase Studio local:** `localhost:54323`
@@ -23,32 +27,54 @@
 ```
 src/
 ├── api/           # Servicios Supabase globales (cliente, tipos base)
-├── assets/        # Recursos estáticos
-├── components/    # Componentes UI compartidos entre features
-├── features/      # Módulos por dominio (customers, products, orders, dashboard)
-│   └── [feature]/
-│       ├── api/           # Hooks TanStack Query → use[Name].ts
-│       ├── components/    # Componentes locales del feature
-│       ├── store/         # Stores Zustand → use[Name]Store.ts
-│       ├── utils/         # Helpers/formatters del feature
-│       ├── [Feature]Page.tsx
-│       └── [Feature].styles.ts
-├── layouts/       # Navbars, Sidebars
+├── assets/        # Recursos estáticos (SVG: logo.tsx, wordmark.tsx)
+├── components/
+│   ├── layout/    # MainNavbar
+│   └── ui/        # Componentes compartidos (EmptyState, MaskedInput)
+├── features/      # Módulos por dominio
+│   ├── auth/      # Login (LoginPage, LoginForm, useAuthStore)
+│   ├── customers/ # CRUD clientes (CustomersPage)
+│   ├── dashboard/ # Home (HomePage)
+│   ├── kitchen/   # Dashboard cocina (KitchenPage + sub-componentes)
+│   ├── order/     # Pedidos + remito PDF (OrderPage, RemitoPreviewPage)
+│   └── products/  # Catálogo (ProductsPage)
+│       └── [feature]/
+│           ├── api/           # Hooks TanStack Query → use[Name].ts + [feature].types.ts
+│           ├── components/    # Componentes locales del feature
+│           ├── store/         # Stores Zustand → use[Name]Store.ts
+│           ├── utils/         # Helpers/formatters del feature
+│           ├── [Feature]Page.tsx
+│           └── [Feature].styles.ts
+├── layouts/       # ProtectedLayout (wrapper de rutas autenticadas)
 ├── routes/        # Centralización de rutas (única fuente de verdad)
-└── utils/         # Helpers globales
+│   └── index.tsx  # Rutas: /, /clientes, /productos, /pedidos, /cocina, /dev/remito
+└── utils/         # Helpers globales (errorMessages, formatters, theme, validators)
 ```
+
+### Testing
+
+Tests con Vitest + Testing Library. Archivos en `__tests__/` dentro de cada feature:
+- `src/features/kitchen/api/__tests__/useUpdateItemStatus.test.ts`
+- `src/features/kitchen/utils/__tests__/kitchen.utils.test.ts`
+- `src/features/order/api/__tests__/useUpdateOrder.cascade.test.ts`
+
+Correr tests: `npm test` (run once) o `npm run test:watch`.
 
 ### Tablas principales (Supabase / PostgreSQL)
 
 | Tabla | Descripción |
 |---|---|
-| `customers` | Clientes individuales y mayoristas |
-| `products` | Catálogo con precios minorista/mayorista |
+| `customers` | Clientes individuales y mayoristas; incluye `tax_status` (final_consumer / simplified_taxpayer / registered_responsible / exempt) |
+| `products` | Catálogo con `variety` (nombre), `unit`, `grams`, precios y categoría |
 | `orders` | Cabecera de pedidos (estado, entrega, pago) |
-| `order_items` | Detalle de ítems por pedido |
+| `order_items` | Detalle de ítems con `order_item_status` (pending → cooking → ready → delivered / cancelled) |
 | `profiles` | Perfil del usuario autenticado (linked a `auth.users`) |
 
 RLS habilitado en todas las tablas. Acceso completo a usuarios autenticados.
+
+**Categorías de productos** (`product_type_enum_v2`): `pepas`, `budin_integral`, `budin_avena`, `cookies`, `cookies_xl`, `alfajores`, `pan`, `talitas`, `galleta_marinera`, `galletitas`, `torta`.
+
+**RPC functions**: `transition_items_to_cooking()` — pasa ítems pendientes a `cooking` cuando llega la fecha de entrega y sincroniza el estado del pedido.
 
 ---
 

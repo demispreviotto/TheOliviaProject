@@ -36,11 +36,12 @@ export const aggregateKitchenData = (orders: any[]): KitchenCategory[] => {
       }
 
       const group = groupMap.get(groupKey)!;
-      group.totalQuantity += item.quantity;
+      const effectiveQty = item.quantity * (product.unit ?? 1);
+      group.totalQuantity += effectiveQty;
       group.items.push({
         id: item.id,
         orderId: order.id,
-        quantity: item.quantity,
+        quantity: effectiveQty,
         status: (item.order_item_status ?? 'pending') as OrderItemStatus,
         notes: item.notes ?? null,
       });

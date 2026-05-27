@@ -1,14 +1,14 @@
-import { CardContent, Button,} from '@mui/material';
-import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
-import BakeryDiningIcon from '@mui/icons-material/BakeryDining';
-import PeopleIcon from '@mui/icons-material/People';
+// import { CardContent, Button, } from '@mui/material';
+// import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
+// import BakeryDiningIcon from '@mui/icons-material/BakeryDining';
+// import PeopleIcon from '@mui/icons-material/People';
 import { useAuthStore } from '../auth/store/useAuthStore';
 import * as S from './HomePage.styles';
 
-const mockBakingList = [
-  { name: 'Budín de Pera', quantity: 12, presentation: 'Grande 500g' },
-  { name: 'Pepas de Membrillo', quantity: 24, presentation: 'Bolsa x 12' },
-];
+// const mockBakingList = [
+//   { name: 'Budín de Pera', quantity: 12, presentation: 'Grande 500g' },
+//   { name: 'Pepas de Membrillo', quantity: 24, presentation: 'Bolsa x 12' },
+// ];
 
 export const HomePage = () => {
   const user = useAuthStore((s) => s.user);
@@ -22,8 +22,7 @@ export const HomePage = () => {
         </S.WelcomeTitle>
       </S.HeaderStack>
 
-      <S.DashboardGridContainer>
-        {/* Quick Actions Row */}
+      {/* <S.DashboardGridContainer>
         <S.GridItemFull>
           <S.SectionCard>
             <CardContent>
@@ -41,10 +40,9 @@ export const HomePage = () => {
               </S.ActionStack>
             </CardContent>
           </S.SectionCard>
-        </S.GridItemFull>
+        </S.GridItemFull> */}
 
-        {/* Baking List Column */}
-        <S.GridItemHalf>
+      {/* <S.GridItemHalf>
           <S.SectionCard>
             <CardContent>
               <S.CardTitle variant="h6">📋 Lista de Horneo (Hoy)</S.CardTitle>
@@ -73,7 +71,7 @@ export const HomePage = () => {
             </CardContent>
           </S.SectionCard>
         </S.GridItemHalf>
-      </S.DashboardGridContainer>
+      </S.DashboardGridContainer> */}
     </S.HomeContainer>
   );
 };

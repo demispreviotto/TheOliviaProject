@@ -18,7 +18,7 @@ export const useKitchenDashboard = (date: string) => {
             quantity,
             order_item_status,
             notes,
-            products(variety, product_category, presentation)
+            products(variety, product_category, unit, grams)
           )
         `)
         .eq('delivery_date', date)
