@@ -15,6 +15,7 @@ El único operador es el **dueño/administrador** del negocio. No hay múltiples
 |---|---|---|
 | `id` | UUID PK | Auto-generado |
 | `category` | ENUM | `individual` \| `wholesale` |
+| `tax_status` | TEXT | `final_consumer` \| `simplified_taxpayer` \| `registered_responsible` \| `exempt` |
 | `full_name` | TEXT | Nombre para particulares |
 | `company_name` | TEXT | Razón social para mayoristas |
 | `tax_id` | TEXT | CUIT / DNI |
@@ -28,9 +29,10 @@ El único operador es el **dueño/administrador** del negocio. No hay múltiples
 | Campo | Tipo | Notas |
 |---|---|---|
 | `id` | UUID PK | |
-| `product_name` | TEXT | |
-| `product_category` | ENUM | `pepas`, `budin`, `cookies`, `alfajores`, `pan`, `talitas`, `torta` |
-| `presentation` | TEXT | Ej: "x6", "x12", "caja grande" |
+| `variety` | TEXT | Nombre/variedad del producto |
+| `product_category` | ENUM | `pepas`, `budin_integral`, `budin_avena`, `cookies`, `cookies_xl`, `alfajores`, `pan`, `talitas`, `galleta_marinera`, `galletitas`, `torta` |
+| `unit` | NUMERIC | Unidades por presentación (default 1) |
+| `grams` | NUMERIC | Peso en gramos (opcional, alternativa a unit) |
 | `wholesale_price` | NUMERIC | Precio mayorista |
 | `retail_price` | NUMERIC | Precio minorista |
 | `is_active` | BOOLEAN | Soft delete (no afecta pedidos históricos) |
@@ -58,6 +60,7 @@ El único operador es el **dueño/administrador** del negocio. No hay múltiples
 | `quantity` | INTEGER | > 0 |
 | `unit_price` | NUMERIC | Precio al momento del pedido (snapshot) |
 | `discount_amount` | NUMERIC | Descuento fijo calculado en frontend |
+| `order_item_status` | ENUM | `pending` → `cooking` → `ready` → `delivered` \| `cancelled` |
 | `notes` | TEXT | Ej: "Promo 2x1", "Regalo por demora" |
 
 ### `profiles`
@@ -67,6 +70,11 @@ El único operador es el **dueño/administrador** del negocio. No hay múltiples
 | `full_name` | TEXT | |
 | `role` | TEXT | Default `staff` |
 
+### RPC Functions
+| Función | Descripción |
+|---|---|
+| `transition_items_to_cooking()` | Pasa ítems `pending` a `cooking` cuando llega la fecha de entrega; sincroniza `orders.order_status` |
+
 ---
 
 ## Flujo de usuario (Administrador)
@@ -74,32 +82,36 @@ El único operador es el **dueño/administrador** del negocio. No hay múltiples
 ```
 Login (Supabase Auth)
 │
-├── Clientes
+├── Clientes ✅
 │   ├── Ver lista (particulares y mayoristas)
-│   ├── Crear / Editar cliente
+│   ├── Crear / Editar cliente (con tax_status)
 │   └── Ver historial de pedidos del cliente
 │
-├── Productos
+├── Productos ✅
 │   ├── Ver catálogo activo/inactivo
-│   ├── Crear / Editar producto (precios y categoría)
+│   ├── Crear / Editar producto (variety, unit/grams, categoría, precios)
 │   └── Activar / Desactivar (soft delete)
 │
-├── Pedidos
+├── Pedidos ✅
 │   ├── Ver lista con filtros (estado, fecha, cliente)
 │   ├── Crear pedido → seleccionar cliente + ítems + fechas + entrega
 │   ├── Editar pedido (productos, cantidades, precios)
 │   ├── Avanzar estado: Pendiente → En Cocina → Listo → Entregado
 │   ├── Registrar pago (efectivo, transferencia, mixto)
-│   └── Cancelar pedido
+│   ├── Cancelar pedido
+│   └── Descargar remito PDF (A4, optimizado para móvil)
 │
-├── Dashboard Cocina (en progreso)
-│   └── Vista por día de lo que hay que producir
+├── Dashboard Cocina ✅
+│   ├── Navegación por fecha (calendario + swipe)
+│   ├── Vista agrupada por categoría de productos a producir
+│   ├── Estado por ítem (pending → cooking → ready)
+│   └── Exportar lista de producción en PDF
 │
-├── Dashboard Entregas (en progreso)
+├── Dashboard Entregas (pendiente)
 │   └── Resumen de pedidos del día con datos de cobro
 │
-└── Control Financiero (en progreso)
-    ├── Ventas por producto / categoría
+└── Control Financiero (pendiente)
+    ├── Resumen de ventas por producto / categoría
     └── Historial de transferencias para AFIP
 ```
 
@@ -112,38 +124,38 @@ Login (Supabase Auth)
 **Objetivo:** que el negocio pueda operar diariamente con el sistema.
 
 - [x] Autenticación (Supabase Auth, login único)
-- [x] Gestión de Clientes (CRUD: particulares y mayoristas)
-- [x] Catálogo de Productos (CRUD con soft delete)
-- [x] Gestión de Pedidos (CRUD, estados, ítems, pagos mixtos)
+- [x] Gestión de Clientes (CRUD: particulares y mayoristas, con `tax_status`)
+- [x] Catálogo de Productos (CRUD con soft delete; esquema `variety` + `unit`/`grams`)
+- [x] Gestión de Pedidos (CRUD, estados, ítems con `order_item_status`, pagos mixtos)
 - [x] Validaciones de formularios robustas (Zod schemas completos, superRefine para mayoristas)
 - [x] Feedback visual consistente (notistack en todas las operaciones + mensajes amigables via getErrorMessage)
 - [x] Manejo de errores de red y estados vacíos (isError + Alert con retry + EmptyState en las 3 tablas)
+- [x] Suite de tests (Vitest + Testing Library: kitchen utils, useUpdateItemStatus, order cascade)
 
-### Fase 2: Dashboards Operativos
+### Fase 2: Dashboards Operativos ⚙️ (parcialmente completa)
 
 **Objetivo:** reducir fricción en las operaciones diarias de cocina y entrega.
 
-- [ ] Dashboard Cocina: vista por día/semana de productos a producir (agrupado por categoría)
+- [x] Dashboard Cocina: navegación por fecha (calendario + swipe), vista agrupada por categoría, transiciones de estado por ítem, export PDF
 - [ ] Dashboard Entregas: lista del día con cliente, dirección, monto a cobrar
-- [ ] Dashboard Empaquetado: listas de producción y packaging
 - [ ] Filtros avanzados en Pedidos (por fecha de entrega, estado, tipo de cliente)
 
-### Fase 3: Control Financiero
+### Fase 3: Control Financiero ⚙️ (parcialmente completa)
 
 **Objetivo:** facilitar el trabajo contable mensual y la carga en AFIP.
 
-- [ ] Creacion de un albaran por pedido para clientes mayoristas, exportable en PDF con funcionalidad para compartir a Whatsapp.
+- [x] Remito por pedido (PDF A4, descarga en móvil, share a WhatsApp)
 - [ ] Resumen de ventas por producto y categoría (período seleccionable)
 - [ ] Historial de transferencias bancarias agrupado por mes
 - [ ] Total facturado por cliente mayorista (para AFIP)
 - [ ] Exportación básica de datos (CSV o similar)
 
-### Fase 4: Insumos, procesos y proveedores.
+### Fase 4: Insumos, procesos y proveedores
 
 **Objetivo:** facilitar el control de insumos.
 
-- [ ] Creacion de tablas en BD donde se registren los insumos necesarios por producto.
-- [ ] Creacion de tablas en BD donde se registren insumos y productos en stock.
+- [ ] Creación de tablas en BD donde se registren los insumos necesarios por producto.
+- [ ] Creación de tablas en BD donde se registren insumos y productos en stock.
 
 ---
 
@@ -151,8 +163,8 @@ Login (Supabase Auth)
 
 Antes de avanzar entre fases, verificar:
 
-1. **Fase 1 → Fase 2**: CRUD completo funcional en customers, products y orders. Sin errores de TypeScript. Formularios con validación Zod operativos. Feedback visual en todas las mutaciones.
-2. **Fase 2 → Fase 3**: Los tres dashboards operativos están funcionales y muestran datos reales. Las queries de TanStack Query están optimizadas (no hay over-fetching).
+1. **Fase 1 → Fase 2** ✅: CRUD completo funcional en customers, products y orders. Sin errores de TypeScript. Formularios con validación Zod operativos. Feedback visual en todas las mutaciones.
+2. **Fase 2 → Fase 3**: Dashboard Entregas funcional y mostrando datos reales. Las queries de TanStack Query optimizadas (no hay over-fetching).
 3. **Cierre Fase 3**: Los reportes financieros coinciden con los datos de `orders` y `order_items`. Revisión con el dueño del negocio antes de considerar el sistema completo.
 
 **Regla general**: cualquier feature nueva que no esté en este plan requiere revisión y actualización de `plan.md` antes de implementarse.
