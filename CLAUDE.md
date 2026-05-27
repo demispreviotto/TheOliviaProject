@@ -60,6 +60,16 @@ Tests con Vitest + Testing Library. Archivos en `__tests__/` dentro de cada feat
 
 Correr tests: `npm test` (run once) o `npm run test:watch`.
 
+### Patrones reutilizables en `src/utils/`
+
+| Archivo | Descripción |
+|---|---|
+| `useTableSort.ts` | Hook genérico de sorting para tablas. Acepta `getValue(item, key)` definido **a nivel de módulo** (fuera del componente) para evitar re-renders. Maneja `string` (localeCompare 'es'), `number` (numérico), e ISO dates (lexicográfico). Nulls siempre al final. |
+| `errorMessages.ts` | Helper `getErrorMessage(error)` para mensajes amigables en catch blocks. |
+| `formatters.ts` | Formatters de moneda y fecha. |
+| `validators.ts` | Helpers de validación Zod compartidos. |
+| `theme.ts` | Tema MUI global. |
+
 ### Tablas principales (Supabase / PostgreSQL)
 
 | Tabla | Descripción |
@@ -84,14 +94,17 @@ RLS habilitado en todas las tablas. Acceso completo a usuarios autenticados.
 - **Archivos**: kebab-case para carpetas y nombres de archivo de módulos; PascalCase para componentes y tipos (`UserCard.tsx`, `CustomerType.ts`).
 - **Hooks y funciones**: camelCase (`useOrders.ts`, `formatPrice.ts`).
 - **Constantes**: UPPER_SNAKE_CASE.
-- **Estilos**: patrón Styled-Alias con Emotion. Archivo separado `[Component].styles.ts`, importado como `import * as S from './X.styles'`.
+- **Estilos**: patrón Styled-Alias con Emotion. Archivo separado `[Component].styles.ts`, importado como `import * as S from './X.styles'`. Al hacer `styled(MuiComponent)`, siempre castear `as typeof MuiComponent` al final para que TypeScript infiera correctamente las props del componente polimorfo (ej: `component={NavLink}`).
 - **Rutas**: todas centralizadas en `src/routes/`. Nunca definir rutas dentro de features.
 - **Estado**:
   - Datos de Supabase → TanStack Query.
   - Estado global de UI → Zustand.
   - Estado local de componente → `useState`.
 - **Schema de BD**: nunca modificar desde el Dashboard de Supabase en producción. Flujo: Docker Studio local → `supabase db diff` → `.sql` en `/migrations` → `supabase db push`.
-- **Estructura de componente** (orden obligatorio): imports → types → component definition (hooks → effects → handlers → return JSX).
+- **Estructura de componente** (orden obligatorio): imports → types/constants → component definition (hooks → effects → handlers → return JSX).
+- **Sorting en tablas**: usar `useTableSort` de `src/utils/useTableSort.ts`. Definir `getValue(item, key)` a nivel de módulo (fuera del componente). El sorting vive **dentro** del componente tabla (no en la página padre).
+- **Filtrado en páginas**: el filtrado por estado/categoría vive en la **página** (`useMemo` sobre el array completo) y se pasa el array ya filtrado a la tabla. El orden de pipeline es siempre: `datos crudos → filtrado (página) → sorted (tabla)`.
+- **Navbar responsiva**: `MainNavbar` usa `display: { xs: 'none', md: 'flex' }` para el nav de escritorio y `display: { xs: 'flex', md: 'none' }` para el bar móvil con Drawer. Agregar nuevas rutas únicamente en el array `NAV_ITEMS` en `MainNavbar.tsx`.
 
 ---
 

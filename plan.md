@@ -131,14 +131,18 @@ Login (Supabase Auth)
 - [x] Feedback visual consistente (notistack en todas las operaciones + mensajes amigables via getErrorMessage)
 - [x] Manejo de errores de red y estados vacíos (isError + Alert con retry + EmptyState en las 3 tablas)
 - [x] Suite de tests (Vitest + Testing Library: kitchen utils, useUpdateItemStatus, order cascade)
+- [x] Sorting por columnas en las 3 tablas principales (hook `useTableSort` genérico + `TableSortLabel`)
+- [x] Filtrado por estado en Pedidos (tabs Activos / Historial / Todos; default oculta entregados/cancelados)
+- [x] Navbar responsiva: Drawer móvil con `NAV_ITEMS` como única fuente de verdad
 
 ### Fase 2: Dashboards Operativos ⚙️ (parcialmente completa)
 
 **Objetivo:** reducir fricción en las operaciones diarias de cocina y entrega.
 
 - [x] Dashboard Cocina: navegación por fecha (calendario + swipe), vista agrupada por categoría, transiciones de estado por ítem, export PDF
+- [x] Bug fix Cocina: query corregida para usar `unit` y `grams` (en vez de columna `presentation` eliminada); `totalQuantity` y chips de estado ahora muestran `quantity × product.unit` (unidades individuales, no bolsas)
 - [ ] Dashboard Entregas: lista del día con cliente, dirección, monto a cobrar
-- [ ] Filtros avanzados en Pedidos (por fecha de entrega, estado, tipo de cliente)
+- [ ] Filtros avanzados adicionales en Pedidos (por fecha de entrega, tipo de cliente)
 
 ### Fase 3: Control Financiero ⚙️ (parcialmente completa)
 
@@ -156,6 +160,17 @@ Login (Supabase Auth)
 
 - [ ] Creación de tablas en BD donde se registren los insumos necesarios por producto.
 - [ ] Creación de tablas en BD donde se registren insumos y productos en stock.
+
+---
+
+## Próximos pasos sugeridos
+
+En orden de prioridad operativa para el negocio:
+
+1. **Dashboard Entregas** (Fase 2) — lista del día: cliente, dirección de entrega, monto pendiente de cobro. Vista compacta orientada a repartidor/entregador.
+2. **Filtros adicionales en Pedidos** — filtro por fecha de entrega (date picker) y por tipo de cliente (individual/mayorista), combinables con los tabs de estado ya existentes.
+3. **Resumen financiero mensual** (Fase 3) — totales por mes, desglose por método de pago (efectivo vs transferencia), para facilitar la carga en AFIP.
+4. **Historial de transferencias** (Fase 3) — listado filtrable por mes, exportable, con CUIT del cliente mayorista.
 
 ---
 
