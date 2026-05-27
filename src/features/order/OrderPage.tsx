@@ -3,7 +3,7 @@ import { CircularProgress, Button, Alert, Dialog, DialogTitle, DialogContent, Ic
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import EditIcon from '@mui/icons-material/Edit';
-import PrintIcon from '@mui/icons-material/Print';
+// import PrintIcon from '@mui/icons-material/Print';
 import ShareIcon from '@mui/icons-material/Share';
 import { OrderTable } from './components/OrderTable';
 import { OrderForm } from './components/OrderForm';
@@ -163,14 +163,14 @@ export const OrderPage = () => {
                     </Button>
                   </span>
                 </Tooltip>
-                <Button
+                {/* <Button
                   size="small"
                   variant="outlined"
                   startIcon={<PrintIcon />}
                   onClick={() => window.print()}
                 >
                   Imprimir Remito
-                </Button>
+                </Button> */}
                 <Button
                   size="small"
                   variant="outlined"
