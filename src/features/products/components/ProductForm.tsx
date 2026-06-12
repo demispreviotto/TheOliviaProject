@@ -23,7 +23,10 @@ const schema = z.object({
   variety: z.string().min(1, 'Nombre demasiado corto'),
   product_category: z.enum(CATEGORY_IDS),
   unit: z.coerce.number().min(1, 'Mínimo 1 unidad'),
-  grams: z.coerce.number().nullable(),
+  grams: z.preprocess(
+    (v) => (v === null || v === '' || v === undefined ? null : v),
+    z.coerce.number().nullable()
+  ),
   wholesale_price: z.coerce.number().min(0, 'El precio debe ser positivo'),
   retail_price: z.coerce.number().min(0, 'El precio debe ser positivo'),
   is_active: z.boolean().default(true),
@@ -66,12 +69,17 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
     }
   }, [initialData, reset]);
 
+  // Keep unit locked to 1 in gram mode so the hidden field never fails min(1)
+  useEffect(() => {
+    if (isGramMode) setValue('unit', 1);
+  }, [isGramMode, setValue]);
+
   const handleToggleMode = (checked: boolean) => {
     setIsGramMode(checked);
     if (checked) {
-      setValue('unit', 1); // Set default unit when switching to grams
+      setValue('unit', 1);
     } else {
-      setValue('grams', null); // Clear grams when switching to unit
+      setValue('grams', null);
     }
   };
 
@@ -140,28 +148,53 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
             </Box>
           </Grid>
 
-          {/* DYNAMIC INPUT */}
-          <Grid  size={{xs:12}}>
+          {/* QUANTITY INPUT — unit or grams, always both registered */}
+          <Grid size={{xs:12}}>
             <Controller
-              name={isGramMode ? "grams" : "unit"}
+              name="unit"
               control={control}
               render={({ field }) => (
                 <TextField
                   {...field}
                   value={field.value ?? ''}
-                  label={isGramMode ? "Cantidad en Gramos" : "Cantidad de Unidades"}
+                  label="Cantidad de Unidades"
                   type="number"
                   fullWidth
                   disabled={isReadOnly}
-                  error={!!(isGramMode ? errors.grams : errors.unit)}
-                  helperText={(isGramMode ? errors.grams : errors.unit)?.message}
+                  error={!!errors.unit}
+                  helperText={errors.unit?.message}
+                  sx={{ display: isGramMode ? 'none' : undefined }}
                   slotProps={{
                     input: {
                       endAdornment: (
                         <InputAdornment position="end">
-                          <Box sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                            {isGramMode ? '[g]' : '[u]'}
-                          </Box>
+                          <Box sx={{ fontWeight: 'bold', color: 'primary.main' }}>[u]</Box>
+                        </InputAdornment>
+                      ),
+                    }
+                  }}
+                />
+              )}
+            />
+            <Controller
+              name="grams"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  value={field.value ?? ''}
+                  label="Cantidad en Gramos"
+                  type="number"
+                  fullWidth
+                  disabled={isReadOnly}
+                  error={!!errors.grams}
+                  helperText={errors.grams?.message}
+                  sx={{ display: isGramMode ? undefined : 'none' }}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Box sx={{ fontWeight: 'bold', color: 'primary.main' }}>[g]</Box>
                         </InputAdornment>
                       ),
                     }
