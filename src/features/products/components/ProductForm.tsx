@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { 
-  TextField, 
-  Button, 
-  MenuItem, 
-  FormControl, 
-  InputLabel, 
-  Select, 
+import {
+  TextField,
+  Button,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
   FormHelperText,
   Grid,
   Box,
@@ -40,7 +40,7 @@ interface ProductFormProps {
   isReadOnly?: boolean;
 }
 
-export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isReadOnly=false }: ProductFormProps) => {
+export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isReadOnly = false }: ProductFormProps) => {
   const {
     control,
     handleSubmit,
@@ -84,11 +84,11 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
   };
 
   return (
-<>
+    <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <S.FormWrapper>
           <Grid container spacing={3}>
-            
+
             {/* Categoría */}
             <Grid size={{ xs: 12, md: 4 }}>
               <FormControl fullWidth disabled={isReadOnly} error={!!errors.product_category}>
@@ -133,79 +133,79 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
             </Grid>
 
             {/* MODE SWITCHER */}
-          <Grid size={{xs:12}}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, bgcolor: 'action.hover', p: 1, borderRadius: 1 }}>
-              <FormControlLabel
-                control={
-                  <Switch 
-                    checked={isGramMode} 
-                    onChange={(e) => handleToggleMode(e.target.checked)} 
-                    disabled={isReadOnly}
-                  />
-                }
-                label={isGramMode ? "Venta por Peso (Gramos)" : "Venta por Unidad"}
-              />
-            </Box>
-          </Grid>
+            <Grid size={{ xs: 12 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, bgcolor: 'action.hover', p: 1, borderRadius: 1 }}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={isGramMode}
+                      onChange={(e) => handleToggleMode(e.target.checked)}
+                      disabled={isReadOnly}
+                    />
+                  }
+                  label={isGramMode ? "Venta por Peso (Gramos)" : "Venta por Unidad"}
+                />
+              </Box>
+            </Grid>
 
-          {/* QUANTITY INPUT — unit or grams, always both registered */}
-          <Grid size={{xs:12}}>
-            <Controller
-              name="unit"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  value={field.value ?? ''}
-                  label="Cantidad de Unidades"
-                  type="number"
-                  fullWidth
-                  disabled={isReadOnly}
-                  error={!!errors.unit}
-                  helperText={errors.unit?.message}
-                  sx={{ display: isGramMode ? 'none' : undefined }}
-                  slotProps={{
-                    input: {
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <Box sx={{ fontWeight: 'bold', color: 'primary.main' }}>[u]</Box>
-                        </InputAdornment>
-                      ),
-                    }
-                  }}
-                />
+            {/* QUANTITY INPUT — unit or grams, always both registered */}
+            <Grid size={{ xs: 12 }}>
+              <Controller
+                name="unit"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    value={field.value ?? ''}
+                    label="Cantidad de Unidades"
+                    type="number"
+                    fullWidth
+                    disabled={isReadOnly}
+                    error={!!errors.unit}
+                    helperText={errors.unit?.message}
+                    sx={{ display: isGramMode ? 'none' : undefined }}
+                    slotProps={{
+                      input: {
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <Box sx={{ fontWeight: 'bold', color: 'primary.main' }}>[u]</Box>
+                          </InputAdornment>
+                        ),
+                      }
+                    }}
+                  />
+                )}
+              />
+              <Controller
+                name="grams"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    value={field.value ?? ''}
+                    label="Cantidad en Gramos"
+                    type="number"
+                    fullWidth
+                    disabled={isReadOnly}
+                    error={!!errors.grams}
+                    helperText={errors.grams?.message}
+                    sx={{ display: isGramMode ? undefined : 'none' }}
+                    slotProps={{
+                      input: {
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <Box sx={{ fontWeight: 'bold', color: 'primary.main' }}>[g]</Box>
+                          </InputAdornment>
+                        ),
+                      }
+                    }}
+                  />
+                )}
+              />
+              {isGramMode && (
+                <FormHelperText sx={{ ml: 2 }}>* Se registrará automáticamente como 1 unidad de X gramos.</FormHelperText>
               )}
-            />
-            <Controller
-              name="grams"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  value={field.value ?? ''}
-                  label="Cantidad en Gramos"
-                  type="number"
-                  fullWidth
-                  disabled={isReadOnly}
-                  error={!!errors.grams}
-                  helperText={errors.grams?.message}
-                  sx={{ display: isGramMode ? undefined : 'none' }}
-                  slotProps={{
-                    input: {
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <Box sx={{ fontWeight: 'bold', color: 'primary.main' }}>[g]</Box>
-                        </InputAdornment>
-                      ),
-                    }
-                  }}
-                />
-              )}
-            />
-            {isGramMode && (
-              <FormHelperText sx={{ ml: 2 }}>* Se registrará automáticamente como 1 unidad de X gramos.</FormHelperText>
-            )}
-          </Grid>
+            </Grid>
 
             {/* Precios */}
             <Grid size={{ xs: 12, md: 6 }}>
@@ -252,32 +252,32 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
                 disabled={isReadOnly}
                 render={({ field }) => (
                   <FormControlLabel
-                  control={<Switch {...field} checked={field.value} />}
-                  label="Producto Activo"
+                    control={<Switch {...field} checked={field.value} />}
+                    label="Producto Activo"
                   />
                 )}
-                />
+              />
             </Grid>
 
             {/* Botón de envío */}
-                {!isReadOnly && (
-            <Grid size={{ xs: 12 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-                <Button onClick={onCancel}>Cancelar</Button>
-                <Button 
-                  type="submit" 
-                  variant="contained" 
-                  color="primary"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Guardando...' : (initialData ? 'Actualizar' : 'Guardar')}
-                </Button>
-              </Box>
-            </Grid>
+            {!isReadOnly && (
+              <Grid size={{ xs: 12 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+                  <Button onClick={onCancel}>Cancelar</Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Guardando...' : (initialData ? 'Actualizar' : 'Guardar')}
+                  </Button>
+                </Box>
+              </Grid>
             )}
           </Grid>
         </S.FormWrapper>
       </form>
-</>
+    </>
   );
 };
