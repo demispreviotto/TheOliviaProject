@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "supabase-reset": "docker rm -f $(docker ps -a -q --filter name=supabase_) && npx supabase start"
   },
   "dependencies": {
     "@anthropic-ai/claude-code": "^2.1.143",

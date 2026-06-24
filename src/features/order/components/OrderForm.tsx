@@ -121,6 +121,7 @@ export const OrderForm = ({ initialData, onSubmit, onCancel, isLoading, isReadOn
     control,
     name: "customer_id",
   });
+
   const selectedCustomer = useMemo(() =>
     customers.find(c => c.id === watchCustomerId),
     [customers, watchCustomerId]

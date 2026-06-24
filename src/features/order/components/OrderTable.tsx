@@ -58,6 +58,7 @@ export const OrderTable = ({ orders, onView }: Props) => {
                 Cliente
               </TableSortLabel>
             </TableCell>
+            <TableCell>Dirección</TableCell>
             <TableCell>Estado</TableCell>
             <TableCell>Pago</TableCell>
             <TableCell sortDirection={sortKey === 'total_price' ? sortDir : false}>
@@ -88,6 +89,12 @@ export const OrderTable = ({ orders, onView }: Props) => {
 
                 <TableCell>
                   {order.customer?.full_name || order.customer?.company_name || 'Cliente no encontrado'}
+                </TableCell>
+
+                <TableCell>
+                  {order.delivery_mode === 'delivery'
+                    ? (order.customer?.delivery_address || '—')
+                    : 'Retira'}
                 </TableCell>
 
                 <TableCell>
