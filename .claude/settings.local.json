@@ -13,7 +13,9 @@
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\emita\\\\Documents\\\\TheOliviaProject.Frontend\\\\src\" -Recurse -Directory | ForEach-Object { $_.FullName } | Sort-Object)",
       "Bash(Get-ChildItem *)",
       "Bash(npx tsc *)",
-      "PowerShell(supabase db push --local 2>&1)"
+      "PowerShell(supabase db push --local 2>&1)",
+      "Bash(graphify query *)",
+      "PowerShell(Invoke-WebRequest -Uri \"http://localhost:5173\" -UseBasicParsing -TimeoutSec 5)"
     ]
   }
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   CircularProgress, Button, Alert, Dialog, DialogTitle, DialogContent,
   IconButton, Tooltip, Box, Tabs, Tab,
@@ -26,6 +27,7 @@ const HISTORY_STATUSES: OrderStatus[] = ['delivered', 'cancelled'];
 
 export const OrderPage = () => {
   const { enqueueSnackbar } = useSnackbar();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: orders, isLoading, isError, refetch } = useOrders();
   const createMutation = useCreateOrder();
   const updateMutation = useUpdateOrder();
@@ -64,6 +66,14 @@ export const OrderPage = () => {
       case 'all':     return orders;
     }
   }, [orders, filterView]);
+
+  // Auto-open create dialog when navigated from dashboard with ?new=true
+  useEffect(() => {
+    if (searchParams.get('new') === 'true') {
+      setModalMode('create');
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // Pre-generate the PDF as soon as the view modal renders the Remito element.
   // The 300 ms delay gives React time to mount and paint the hidden element before

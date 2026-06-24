@@ -10,6 +10,7 @@ import BreakfastDiningOutlinedIcon from '@mui/icons-material/BreakfastDiningOutl
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import AssignmentIcon from '@mui/icons-material/AssignmentOutlined';
 import HistoryIcon from '@mui/icons-material/History';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import { useAuthStore } from '../../../features/auth/store/useAuthStore';
 import { useQueryClient } from '@tanstack/react-query';
 import * as S from './MainNavbar.styles';
@@ -27,6 +28,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/productos', label: 'Productos', Icon: BreakfastDiningOutlinedIcon },
   { to: '/pedidos',   label: 'Pedidos',   Icon: AssignmentIcon },
   { to: '/cocina',    label: 'Cocina',    Icon: HistoryIcon },
+  { to: '/reporte',   label: 'Reporte',   Icon: BarChartIcon },
 ];
 
 const DRAWER_WIDTH = 240;

@@ -33,3 +33,9 @@ dist-ssr
 supabase/.branches/
 supabase/.temp/
 products_import.sql
+
+# Test coverage
+coverage/
+
+# Graphify
+graphify-out/

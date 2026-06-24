@@ -7,6 +7,7 @@ import { CustomersPage } from '../features/customers/CustomersPage';
 import { OrderPage } from '../features/order/OrderPage';
 import { RemitoPreviewPage } from '../features/order/RemitoPreviewPage';
 import { KitchenPage } from '../features/kitchen/KitchenPage';
+import { ReportPage } from '../features/report/ReportPage';
 import { ProtectedLayout } from '../layouts/ProtectedLayout';
 import type { JSX } from 'react';
 
@@ -43,6 +44,7 @@ export const AppRouter = () => {
           <Route path="/productos" element={<ProductsPage />} />
           <Route path="/pedidos" element={<OrderPage />} />
           <Route path="/cocina" element={<KitchenPage />} />
+          <Route path="/reporte" element={<ReportPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
