@@ -171,6 +171,31 @@ These rules exist to prevent accidental data loss or irreversible changes to the
 
 ---
 
+## Knowledge Graph (graphify)
+
+A graphify knowledge graph has been built for this codebase. Outputs live in `graphify-out/`.
+
+**Fast path — answer questions from the graph first:**
+Before searching the codebase manually, check `graphify-out/graph.json` and run:
+```bash
+graphify query "<question>"
+```
+Use this for any question about the codebase: "How does X work?", "What calls Y?", "Trace data flow through Z?". Only fall back to Grep/Read when the graph answer is insufficient.
+
+**Update the graph after significant changes:**
+```bash
+graphify update .
+```
+
+**Key outputs:**
+| File | Description |
+|---|---|
+| `graphify-out/graph.json` | Raw graph data (nodes, edges, communities) |
+| `graphify-out/GRAPH_REPORT.md` | God nodes, surprising connections, suggested questions |
+| `graphify-out/graph.html` | Interactive visualization |
+
+---
+
 ## Useful Links
 
 - [plan.md](./plan.md)

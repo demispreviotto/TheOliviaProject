@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+
+# Supabase local runtime
+supabase/.branches/
+supabase/.temp/
+.branches/
+.temp/
+
+# Graphify output (don't index the graph itself)
+graphify-out/
+
+# Test snapshots and coverage
+coverage/
+*.snap
+
+# Logs
+*.log
+logs/
+
+# Environment files (contain secrets)
+.env
+.env.local
+.env.*.local
+.env.keys
+
+# Editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# SQL import files
+*.sql
