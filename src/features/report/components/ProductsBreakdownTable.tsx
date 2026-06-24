@@ -51,7 +51,7 @@ export const ProductsBreakdownTable = ({ rows }: Props) => {
           <TableCell align="right">{formatCurrency(totalRevenue)}</TableCell>
           <TableCell align="right">
             {totalDiscount > 0 ? (
-              <Typography variant="inherit" color="warning.main" fontWeight={700}>
+              <Typography variant="inherit" color="warning.main" sx={{ fontWeight: 700 }}>
                 -{formatCurrency(totalDiscount)}
               </Typography>
             ) : '—'}

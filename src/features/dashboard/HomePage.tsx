@@ -1,4 +1,4 @@
-import { Grid, Stack, Typography } from '@mui/material';
+import { Grid, Stack } from '@mui/material';
 import { useAuthStore } from '../auth/store/useAuthStore';
 import { MonthlyKpiBar } from '../report/components/MonthlyKpiBar';
 import { TodayDeliveriesCard } from './components/TodayDeliveriesCard';
@@ -18,7 +18,7 @@ export const HomePage = () => {
       </S.HeaderStack>
 
       <Stack spacing={2}>
-        <Grid container spacing={2} alignItems="stretch">
+        <Grid container spacing={2} sx={{ alignItems: 'stretch' }}>
           <Grid size={{ xs: 12, md: 7 }}>
             <TodayDeliveriesCard />
           </Grid>
