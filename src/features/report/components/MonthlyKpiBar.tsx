@@ -11,10 +11,10 @@ const MONTH_NAMES = [
 
 const Kpi = ({ label, value }: { label: string; value: string }) => (
   <Box>
-    <Typography variant="caption" color="text.secondary" display="block">
+    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
       {label}
     </Typography>
-    <Typography variant="h6" fontWeight={700}>
+    <Typography variant="h6" sx={{ fontWeight: 700 }}>
       {value}
     </Typography>
   </Box>
@@ -27,10 +27,10 @@ export const MonthlyKpiBar = () => {
   return (
     <Card variant="outlined">
       <CardContent>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-          <Stack direction="row" spacing={1} alignItems="center">
+        <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
             <BarChartIcon color="primary" fontSize="small" />
-            <Typography variant="subtitle1" fontWeight={600}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
               {MONTH_NAMES[now.getMonth()]} {now.getFullYear()}
             </Typography>
           </Stack>

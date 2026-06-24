@@ -37,12 +37,12 @@ interface StatusRowProps {
 }
 
 const StatusRow = ({ label, count, color }: StatusRowProps) => (
-  <Stack direction="row" justifyContent="space-between" alignItems="center" py={0.75}>
-    <Stack direction="row" spacing={1} alignItems="center">
+  <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', py: 0.75 }}>
+    <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
       <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: color }} />
       <Typography variant="body2">{label}</Typography>
     </Stack>
-    <Typography variant="body2" fontWeight={600}>
+    <Typography variant="body2" sx={{ fontWeight: 600 }}>
       {count} u
     </Typography>
   </Stack>
@@ -58,9 +58,9 @@ export const KitchenStatusCard = () => {
     <Card variant="outlined" sx={{ height: '100%' }}>
       <CardHeader
         title={
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
             <RestaurantIcon fontSize="small" color="primary" />
-            <Typography variant="subtitle1" fontWeight={600}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
               Cocina — hoy
             </Typography>
           </Stack>
@@ -70,7 +70,7 @@ export const KitchenStatusCard = () => {
       />
       <CardContent sx={{ pt: 1 }}>
         {isLoading && (
-          <Stack alignItems="center" py={3}>
+          <Stack sx={{ alignItems: 'center', py: 3 }}>
             <CircularProgress size={24} />
           </Stack>
         )}
@@ -78,7 +78,7 @@ export const KitchenStatusCard = () => {
         {!isLoading && counts && (
           <>
             {total === 0 ? (
-              <Typography variant="body2" color="text.secondary" py={1}>
+              <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
                 Sin ítems en cocina para hoy.
               </Typography>
             ) : (
@@ -89,7 +89,7 @@ export const KitchenStatusCard = () => {
               </Stack>
             )}
 
-            <Stack direction="row" spacing={1} mt={2}>
+            <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
               <Button
                 variant="contained"
                 size="small"

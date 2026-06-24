@@ -26,7 +26,7 @@ export const TodayDeliveriesCard = () => {
     <Card variant="outlined" sx={{ height: '100%' }}>
       <CardHeader
         title={
-          <Typography variant="subtitle1" fontWeight={600}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             Entregas de hoy
           </Typography>
         }
@@ -39,13 +39,13 @@ export const TodayDeliveriesCard = () => {
       />
       <CardContent sx={{ pt: 1 }}>
         {isLoading && (
-          <Stack alignItems="center" py={3}>
+          <Stack sx={{ alignItems: 'center', py: 3 }}>
             <CircularProgress size={24} />
           </Stack>
         )}
 
         {!isLoading && orders?.length === 0 && (
-          <Typography variant="body2" color="text.secondary" py={2}>
+          <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
             Sin entregas programadas para hoy.
           </Typography>
         )}
@@ -59,17 +59,17 @@ export const TodayDeliveriesCard = () => {
                   <ListItem disablePadding sx={{ py: 1 }}>
                     <ListItemText
                       primary={
-                        <Stack direction="row" alignItems="center" spacing={1}>
+                        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                           {order.delivery_mode === 'delivery'
                             ? <LocalShippingOutlinedIcon fontSize="small" color="action" />
                             : <StorefrontOutlinedIcon fontSize="small" color="action" />}
-                          <Typography variant="body2" fontWeight={500}>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
                             {clientName(order)}
                           </Typography>
                         </Stack>
                       }
                       secondary={
-                        <Stack direction="row" spacing={1} alignItems="center" mt={0.5}>
+                        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mt: 0.5 }}>
                           <Chip
                             label={chip.label}
                             color={chip.color}

@@ -33,10 +33,10 @@ interface KpiCardProps {
 const KpiCard = ({ label, value, sub, color }: KpiCardProps) => (
   <Card variant="outlined" sx={{ height: '100%' }}>
     <CardContent>
-      <Typography variant="caption" color="text.secondary" display="block">
+      <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
         {label}
       </Typography>
-      <Typography variant="h5" fontWeight={700} color={color ?? 'text.primary'} mt={0.5}>
+      <Typography variant="h5" color={color ?? 'text.primary'} sx={{ fontWeight: 700, mt: 0.5 }}>
         {value}
       </Typography>
       {sub && (
@@ -71,11 +71,11 @@ export const ReportPage = () => {
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1100, mx: 'auto' }}>
       {/* Header */}
-      <Stack direction="row" alignItems="center" spacing={1} mb={3}>
+      <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 3 }}>
         <IconButton onClick={prevMonth} size="small">
           <ChevronLeftIcon />
         </IconButton>
-        <Typography variant="h5" fontWeight={700} minWidth={220} textAlign="center">
+        <Typography variant="h5" sx={{ fontWeight: 700, minWidth: 220, textAlign: 'center' }}>
           Reporte — {MONTH_NAMES[month]} {year}
         </Typography>
         <IconButton onClick={nextMonth} size="small" disabled={isCurrentMonth}>
@@ -84,7 +84,7 @@ export const ReportPage = () => {
       </Stack>
 
       {isLoading && (
-        <Box display="flex" justifyContent="center" py={6}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
           <CircularProgress />
         </Box>
       )}
@@ -138,7 +138,7 @@ export const ReportPage = () => {
 
           {/* Products table */}
           <Box>
-            <Typography variant="h6" fontWeight={600} mb={1.5}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 1.5 }}>
               Productos del mes
             </Typography>
             {data.products.length === 0 ? (
@@ -152,8 +152,8 @@ export const ReportPage = () => {
 
           {/* Clients table */}
           <Box>
-            <Stack direction="row" alignItems="center" spacing={1} mb={1.5}>
-              <Typography variant="h6" fontWeight={600}>
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 1.5 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
                 Clientes
               </Typography>
               {data.kpis.cancelled_orders === 0 && (
@@ -163,7 +163,7 @@ export const ReportPage = () => {
               )}
             </Stack>
             {data.clients.length === 0 ? (
-              <Stack direction="row" spacing={1} alignItems="center">
+              <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                 <CancelIcon color="disabled" fontSize="small" />
                 <Typography color="text.secondary">Sin pedidos este mes.</Typography>
               </Stack>
