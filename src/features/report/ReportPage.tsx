@@ -1,14 +1,6 @@
 import { useState } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  CircularProgress,
-  Divider,
-  Grid,
-  IconButton,
-  Stack,
-  Typography,
+  Card, CardContent, CircularProgress, Divider, Grid, IconButton, Stack, Typography,
 } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -17,6 +9,7 @@ import { useMonthlyReport } from './api/useMonthlyReport';
 import { ProductsBreakdownTable } from './components/ProductsBreakdownTable';
 import { ClientComparisonTable } from './components/ClientComparisonTable';
 import { formatCurrency } from '../../utils/formatters';
+import * as S from './ReportPage.styles';
 
 const MONTH_NAMES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -33,12 +26,12 @@ interface KpiCardProps {
 const KpiCard = ({ label, value, sub, color }: KpiCardProps) => (
   <Card variant="outlined" sx={{ height: '100%' }}>
     <CardContent>
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+      <S.KpiLabel variant="caption" color="text.secondary">
         {label}
-      </Typography>
-      <Typography variant="h5" color={color ?? 'text.primary'} sx={{ fontWeight: 700, mt: 0.5 }}>
+      </S.KpiLabel>
+      <S.KpiValue variant="h5" color={color ?? 'text.primary'}>
         {value}
-      </Typography>
+      </S.KpiValue>
       {sub && (
         <Typography variant="caption" color="text.secondary">
           {sub}
@@ -69,24 +62,23 @@ export const ReportPage = () => {
   const isCurrentMonth = year === now.getFullYear() && month === now.getMonth();
 
   return (
-    <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1100, mx: 'auto' }}>
-      {/* Header */}
-      <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 3 }}>
+    <S.PageRoot>
+      <S.NavRow spacing={1}>
         <IconButton onClick={prevMonth} size="small">
           <ChevronLeftIcon />
         </IconButton>
-        <Typography variant="h5" sx={{ fontWeight: 700, minWidth: 220, textAlign: 'center' }}>
+        <S.MonthTitle variant="h5">
           Reporte — {MONTH_NAMES[month]} {year}
-        </Typography>
+        </S.MonthTitle>
         <IconButton onClick={nextMonth} size="small" disabled={isCurrentMonth}>
           <ChevronRightIcon />
         </IconButton>
-      </Stack>
+      </S.NavRow>
 
       {isLoading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+        <S.LoadingWrapper sx={{ py: 6 }}>
           <CircularProgress />
-        </Box>
+        </S.LoadingWrapper>
       )}
 
       {isError && (
@@ -137,42 +129,38 @@ export const ReportPage = () => {
           <Divider />
 
           {/* Products table */}
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 1.5 }}>
-              Productos del mes
-            </Typography>
+          <div>
+            <S.SectionTitle variant="h6">Productos del mes</S.SectionTitle>
             {data.products.length === 0 ? (
               <Typography color="text.secondary">Sin productos este mes.</Typography>
             ) : (
               <ProductsBreakdownTable rows={data.products} />
             )}
-          </Box>
+          </div>
 
           <Divider />
 
           {/* Clients table */}
-          <Box>
-            <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 1.5 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Clientes
-              </Typography>
+          <div>
+            <S.SectionHeader spacing={1}>
+              <S.SectionTitle variant="h6" sx={{ mb: 0 }}>Clientes</S.SectionTitle>
               {data.kpis.cancelled_orders === 0 && (
                 <Typography variant="caption" color="text.secondary">
                   (comparación vs mes anterior)
                 </Typography>
               )}
-            </Stack>
+            </S.SectionHeader>
             {data.clients.length === 0 ? (
-              <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+              <S.EmptyRow spacing={1}>
                 <CancelIcon color="disabled" fontSize="small" />
                 <Typography color="text.secondary">Sin pedidos este mes.</Typography>
-              </Stack>
+              </S.EmptyRow>
             ) : (
               <ClientComparisonTable rows={data.clients} />
             )}
-          </Box>
+          </div>
         </Stack>
       )}
-    </Box>
+    </S.PageRoot>
   );
 };
