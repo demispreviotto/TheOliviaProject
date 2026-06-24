@@ -1,12 +1,13 @@
 import {
-  Box, Button, Card, CardContent, CardHeader, CircularProgress,
-  Divider, Stack, Typography,
+  Box, Button, Card, CardContent, CardHeader, CircularProgress, Divider, Stack, Typography,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import { useNavigate } from 'react-router-dom';
 import { useKitchenDashboard } from '../../kitchen/api/useKitchenDashboard';
+import { EmptyState } from '../../../components/ui/EmptyState';
 import type { KitchenCategory } from '../../kitchen/api/kitchen.types';
+import * as S from './KitchenStatusCard.styles';
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -37,15 +38,13 @@ interface StatusRowProps {
 }
 
 const StatusRow = ({ label, count, color }: StatusRowProps) => (
-  <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', py: 0.75 }}>
-    <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+  <S.StatusRowRoot>
+    <S.StatusLabel spacing={1}>
       <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: color }} />
       <Typography variant="body2">{label}</Typography>
-    </Stack>
-    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-      {count} u
-    </Typography>
-  </Stack>
+    </S.StatusLabel>
+    <S.StatusCount variant="body2">{count} u</S.StatusCount>
+  </S.StatusRowRoot>
 );
 
 export const KitchenStatusCard = () => {
@@ -58,29 +57,25 @@ export const KitchenStatusCard = () => {
     <Card variant="outlined" sx={{ height: '100%' }}>
       <CardHeader
         title={
-          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          <S.TitleRow spacing={1}>
             <RestaurantIcon fontSize="small" color="primary" />
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              Cocina — hoy
-            </Typography>
-          </Stack>
+            <S.TitleText variant="subtitle1">Cocina — hoy</S.TitleText>
+          </S.TitleRow>
         }
         subheader={!isLoading && counts ? `${total} unidades en total` : undefined}
         sx={{ pb: 0 }}
       />
       <CardContent sx={{ pt: 1 }}>
         {isLoading && (
-          <Stack sx={{ alignItems: 'center', py: 3 }}>
+          <S.LoadingWrapper>
             <CircularProgress size={24} />
-          </Stack>
+          </S.LoadingWrapper>
         )}
 
         {!isLoading && counts && (
           <>
             {total === 0 ? (
-              <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
-                Sin ítems en cocina para hoy.
-              </Typography>
+              <EmptyState message="Sin ítems en cocina para hoy." />
             ) : (
               <Stack divider={<Divider />}>
                 <StatusRow label="Pendientes" count={counts.pending} color="text.disabled" />
@@ -89,7 +84,7 @@ export const KitchenStatusCard = () => {
               </Stack>
             )}
 
-            <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+            <S.ActionRow spacing={1}>
               <Button
                 variant="contained"
                 size="small"
@@ -107,7 +102,7 @@ export const KitchenStatusCard = () => {
               >
                 Ver cocina
               </Button>
-            </Stack>
+            </S.ActionRow>
           </>
         )}
       </CardContent>

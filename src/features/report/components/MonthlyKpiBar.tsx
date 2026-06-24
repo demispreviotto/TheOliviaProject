@@ -1,8 +1,9 @@
-import { Box, Button, Card, CardContent, Grid, Skeleton, Stack, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, Grid, Skeleton } from '@mui/material';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import { Link } from 'react-router-dom';
 import { useMonthlyReport } from '../api/useMonthlyReport';
 import { formatCurrency } from '../../../utils/formatters';
+import * as S from './MonthlyKpiBar.styles';
 
 const MONTH_NAMES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -11,12 +12,10 @@ const MONTH_NAMES = [
 
 const Kpi = ({ label, value }: { label: string; value: string }) => (
   <Box>
-    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+    <S.KpiLabel variant="caption" color="text.secondary">
       {label}
-    </Typography>
-    <Typography variant="h6" sx={{ fontWeight: 700 }}>
-      {value}
-    </Typography>
+    </S.KpiLabel>
+    <S.KpiValue variant="h6">{value}</S.KpiValue>
   </Box>
 );
 
@@ -27,13 +26,13 @@ export const MonthlyKpiBar = () => {
   return (
     <Card variant="outlined">
       <CardContent>
-        <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+        <S.BarHeader>
+          <S.MonthInfo spacing={1}>
             <BarChartIcon color="primary" fontSize="small" />
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            <S.MonthTitle variant="subtitle1">
               {MONTH_NAMES[now.getMonth()]} {now.getFullYear()}
-            </Typography>
-          </Stack>
+            </S.MonthTitle>
+          </S.MonthInfo>
           <Button
             component={Link}
             to="/reporte"
@@ -43,7 +42,7 @@ export const MonthlyKpiBar = () => {
           >
             Ver reporte
           </Button>
-        </Stack>
+        </S.BarHeader>
 
         {isLoading ? (
           <Grid container spacing={2}>
@@ -66,10 +65,7 @@ export const MonthlyKpiBar = () => {
               <Kpi label="Ingresos esperados" value={formatCurrency(data.kpis.total_income)} />
             </Grid>
             <Grid size={{ xs: 6, sm: 3 }}>
-              <Kpi
-                label="Pendiente de cobro"
-                value={formatCurrency(data.kpis.pending_income)}
-              />
+              <Kpi label="Pendiente de cobro" value={formatCurrency(data.kpis.pending_income)} />
             </Grid>
           </Grid>
         ) : null}

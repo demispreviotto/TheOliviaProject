@@ -5,8 +5,10 @@ import {
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
 import { useTodayOrders } from '../api/useTodayOrders';
+import { EmptyState } from '../../../components/ui/EmptyState';
 import { formatCurrency } from '../../../utils/formatters';
 import type { Order, OrderStatus } from '../../order/api/order.types';
+import * as S from './TodayDeliveriesCard.styles';
 
 const STATUS_CHIP: Record<OrderStatus, { label: string; color: 'default' | 'warning' | 'info' | 'success' | 'error' }> = {
   pending:   { label: 'Pendiente', color: 'default' },
@@ -26,9 +28,7 @@ export const TodayDeliveriesCard = () => {
     <Card variant="outlined" sx={{ height: '100%' }}>
       <CardHeader
         title={
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-            Entregas de hoy
-          </Typography>
+          <S.CardTitle variant="subtitle1">Entregas de hoy</S.CardTitle>
         }
         subheader={
           !isLoading && orders
@@ -39,15 +39,13 @@ export const TodayDeliveriesCard = () => {
       />
       <CardContent sx={{ pt: 1 }}>
         {isLoading && (
-          <Stack sx={{ alignItems: 'center', py: 3 }}>
+          <S.LoadingWrapper>
             <CircularProgress size={24} />
-          </Stack>
+          </S.LoadingWrapper>
         )}
 
         {!isLoading && orders?.length === 0 && (
-          <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-            Sin entregas programadas para hoy.
-          </Typography>
+          <EmptyState message="Sin entregas programadas para hoy." />
         )}
 
         {!isLoading && orders && orders.length > 0 && (
@@ -59,17 +57,15 @@ export const TodayDeliveriesCard = () => {
                   <ListItem disablePadding sx={{ py: 1 }}>
                     <ListItemText
                       primary={
-                        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                        <S.OrderNameRow spacing={1}>
                           {order.delivery_mode === 'delivery'
                             ? <LocalShippingOutlinedIcon fontSize="small" color="action" />
                             : <StorefrontOutlinedIcon fontSize="small" color="action" />}
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                            {clientName(order)}
-                          </Typography>
-                        </Stack>
+                          <S.ClientName variant="body2">{clientName(order)}</S.ClientName>
+                        </S.OrderNameRow>
                       }
                       secondary={
-                        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mt: 0.5 }}>
+                        <S.OrderMeta spacing={1}>
                           <Chip
                             label={chip.label}
                             color={chip.color}
@@ -79,7 +75,7 @@ export const TodayDeliveriesCard = () => {
                           <Typography variant="caption" color="text.secondary">
                             {formatCurrency(order.total_price)}
                           </Typography>
-                        </Stack>
+                        </S.OrderMeta>
                       }
                     />
                   </ListItem>
