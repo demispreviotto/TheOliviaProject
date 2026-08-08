@@ -45,8 +45,3 @@ export const SectionHeader = styled(Stack)(({ theme }) => ({
   alignItems: 'center',
   marginBottom: theme.spacing(1.5),
 }));
-
-export const EmptyRow = styled(Stack)({
-  flexDirection: 'row',
-  alignItems: 'center',
-});
