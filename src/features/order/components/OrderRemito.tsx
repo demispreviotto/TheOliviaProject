@@ -48,8 +48,8 @@ export const OrderRemito = ({ order }: Props) => {
               <Wordmark size={120} fill={theme.palette.primary.main} />
             </S.LogoWrapper>
             <S.BrandingInfoBox>
-              <S.BrandLine>Domicilio Comercial: (completar)</S.BrandLine>
-              <S.BrandLine>CUIT: (completar)</S.BrandLine>
+              <S.BrandLine>Domicilio Comercial: Lorenzatti 350</S.BrandLine>
+              <S.BrandLine>CUIT: 27377978337</S.BrandLine>
               <S.BrandLine>Cond. IVA: Monotributista</S.BrandLine>
             </S.BrandingInfoBox>
           </S.BrandingBox>
@@ -75,7 +75,7 @@ export const OrderRemito = ({ order }: Props) => {
           <S.CustomerRow>
             <span>
               <strong>Señor/es:</strong>&nbsp;
-              {customer?.company_name || customer?.full_name || '—'}
+              {customer?.full_name || '—'}
             </span>
             <span>
               <strong>Fecha de entrega:</strong>&nbsp;

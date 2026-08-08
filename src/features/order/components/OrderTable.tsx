@@ -20,7 +20,7 @@ type OrderSortKey = 'delivery_date' | 'customer' | 'total_price';
 const getOrderValue = (order: Order, key: OrderSortKey): string | number | null => {
   switch (key) {
     case 'delivery_date': return order.delivery_date;
-    case 'customer':      return order.customer?.full_name || order.customer?.company_name || null;
+    case 'customer':      return order.customer?.full_name || null;
     case 'total_price':   return Number(order.total_price);
   }
 };
@@ -88,7 +88,7 @@ export const OrderTable = ({ orders, onView }: Props) => {
                 </TableCell>
 
                 <TableCell>
-                  {order.customer?.full_name || order.customer?.company_name || 'Cliente no encontrado'}
+                  {order.customer?.full_name || 'Cliente no encontrado'}
                 </TableCell>
 
                 <TableCell>
