@@ -4,7 +4,6 @@ import {
 } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import CancelIcon from '@mui/icons-material/Cancel';
 import { useMonthlyReport } from './api/useMonthlyReport';
 import { ProductsBreakdownTable } from './components/ProductsBreakdownTable';
 import { ClientComparisonTable } from './components/ClientComparisonTable';
@@ -131,11 +130,7 @@ export const ReportPage = () => {
           {/* Products table */}
           <div>
             <S.SectionTitle variant="h6">Productos del mes</S.SectionTitle>
-            {data.products.length === 0 ? (
-              <Typography color="text.secondary">Sin productos este mes.</Typography>
-            ) : (
-              <ProductsBreakdownTable rows={data.products} />
-            )}
+            <ProductsBreakdownTable rows={data.products} />
           </div>
 
           <Divider />
@@ -144,20 +139,13 @@ export const ReportPage = () => {
           <div>
             <S.SectionHeader spacing={1}>
               <S.SectionTitle variant="h6" sx={{ mb: 0 }}>Clientes</S.SectionTitle>
-              {data.kpis.cancelled_orders === 0 && (
+              {/* {data.kpis.cancelled_orders === 0 && (
                 <Typography variant="caption" color="text.secondary">
                   (comparación vs mes anterior)
                 </Typography>
-              )}
+              )} */}
             </S.SectionHeader>
-            {data.clients.length === 0 ? (
-              <S.EmptyRow spacing={1}>
-                <CancelIcon color="disabled" fontSize="small" />
-                <Typography color="text.secondary">Sin pedidos este mes.</Typography>
-              </S.EmptyRow>
-            ) : (
-              <ClientComparisonTable rows={data.clients} />
-            )}
+            <ClientComparisonTable rows={data.clients} />
           </div>
         </Stack>
       )}

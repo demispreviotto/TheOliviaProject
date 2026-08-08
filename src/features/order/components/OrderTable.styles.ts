@@ -1,14 +1,7 @@
 import { styled } from '@mui/material/styles';
-import { TableRow, TableCell, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 
-export const StyledHeaderRow = styled(TableRow)(({ theme }) => ({
-  backgroundColor: theme.palette.action.hover,
-  '& th': {
-    fontWeight: 'bold',
-  },
-}));
-
-export const PriceCell = styled(TableCell)({
+export const PriceText = styled('span')({
   fontWeight: 'bold',
 });
 
