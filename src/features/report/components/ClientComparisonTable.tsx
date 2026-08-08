@@ -11,6 +11,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import RemoveIcon from '@mui/icons-material/Remove';
 import type { ClientReportRow } from '../api/report.types';
 import { formatCurrency } from '../../../utils/formatters';
+import { CATEGORY_LABELS } from '../../customers/utils/customerMappings';
 
 interface Props {
   rows: ClientReportRow[];
@@ -58,11 +59,11 @@ export const ClientComparisonTable = ({ rows }: Props) => (
       {rows.map((row) => (
         <TableRow key={row.customer_id} hover>
           <TableCell>
-            {row.company_name ?? row.full_name}
+            {row.full_name}
           </TableCell>
           <TableCell>
             <Chip
-              label={row.category === 'wholesale' ? 'Mayor' : 'Minorista'}
+              label={CATEGORY_LABELS[row.category]}
               size="small"
               variant="outlined"
               color={row.category === 'wholesale' ? 'secondary' : 'default'}

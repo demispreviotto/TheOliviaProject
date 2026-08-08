@@ -12,7 +12,7 @@ type CustomerSortKey = 'name' | 'category';
 
 const getCustomerValue = (customer: Customer, key: CustomerSortKey): string | null => {
   switch (key) {
-    case 'name':     return customer.full_name || customer.company_name || null;
+    case 'name':     return customer.full_name;
     case 'category': return customer.category;
   }
 };
@@ -62,7 +62,7 @@ export const CustomerTable = ({ customers, onView }: Props) => {
               onClick={() => onView(customer)}
               sx={{ cursor: 'pointer' }}
             >
-              <TableCell>{customer.full_name || customer.company_name}</TableCell>
+              <TableCell>{customer.full_name}</TableCell>
               <TableCell>
                 <Chip
                   label={CATEGORY_LABELS[customer.category]}

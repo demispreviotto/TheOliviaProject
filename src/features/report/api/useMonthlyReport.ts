@@ -135,7 +135,7 @@ function buildClients(
     const prev = prevMap.get(customer_id);
     rows.push({
       customer_id,
-      full_name: meta?.full_name ?? '',
+      full_name: meta ? (meta.full_name ?? '') : 'Cliente eliminado',
       company_name: meta?.company_name ?? null,
       category: (meta as { category?: 'individual' | 'wholesale' })?.category ?? 'individual',
       order_count: curr.count,

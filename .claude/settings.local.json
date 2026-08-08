@@ -15,7 +15,9 @@
       "Bash(npx tsc *)",
       "PowerShell(supabase db push --local 2>&1)",
       "Bash(graphify query *)",
-      "PowerShell(Invoke-WebRequest -Uri \"http://localhost:5173\" -UseBasicParsing -TimeoutSec 5)"
+      "PowerShell(Invoke-WebRequest -Uri \"http://localhost:5173\" -UseBasicParsing -TimeoutSec 5)",
+      "mcp__visualize__read_me",
+      "mcp__visualize__show_widget"
     ]
   }
 }
