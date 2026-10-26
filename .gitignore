@@ -36,6 +36,8 @@ dist-ssr
 supabase/.branches/
 supabase/.temp/
 products_import.sql
+supabase/products_data.csv
+supabase/pg_cron_production.sql
 
 # Test coverage
 coverage/
