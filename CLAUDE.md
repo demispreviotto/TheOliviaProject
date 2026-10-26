@@ -137,6 +137,7 @@ RLS enabled on all tables. Full access for authenticated users.
 3. Always update `plan.md` and `CLAUDE.md` when architecture or scope decisions change.
 4. The only system user is the business admin/owner (no multi-tenant or complex roles for now).
 5. DB migrations are versioned in `supabase/migrations/` and must never be edited once applied in production.
+6. Never add AI-authorship signatures or marks (e.g. "Co-Authored-By: Claude...", "Generated with Claude Code", or similar) to commit messages, PR descriptions, code comments, or any other content in this repo.
 
 ---
 
