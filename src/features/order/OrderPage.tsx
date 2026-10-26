@@ -105,7 +105,7 @@ export const OrderPage = () => {
     navigator.share({
       files: [remitoFile],
       title: 'Remito de Pedido',
-      text: 'Adjuntamos el remito digital de su pedido.',
+      text: 'Holaaa, te dejamos el remito digital de tu pedido! Muchas gracias ✨',
     }).catch((err: unknown) => {
       if (err instanceof Error && err.name !== 'AbortError') {
         enqueueSnackbar('No se pudo compartir el remito.', { variant: 'error' });
