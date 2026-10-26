@@ -25,12 +25,19 @@ El único operador es el **dueño/administrador** del negocio. No hay múltiples
 | `billing_address` | TEXT | Dirección de facturación |
 | `notes` | TEXT | Observaciones internas |
 
+### `categories`
+| Campo | Tipo | Notas |
+|---|---|---|
+| `id` | TEXT PK | Texto mostrado tal cual (ej. `pepas`, o `Medialunas` si se crea desde la UI) |
+
+Reemplaza al ENUM `product_type_enum` (migración `20261026_add_categories_table.sql`) para que el admin pueda crear categorías nuevas desde el formulario de producto, sin requerir una migración. Sembrada con las 11 categorías originales: `pepas`, `budin_integral`, `budin_avena`, `cookies`, `cookies_xl`, `alfajores`, `pan`, `talitas`, `galleta_marinera`, `galletitas`, `torta`.
+
 ### `products`
 | Campo | Tipo | Notas |
 |---|---|---|
 | `id` | UUID PK | |
 | `variety` | TEXT | Nombre/variedad del producto |
-| `product_category` | ENUM | `pepas`, `budin_integral`, `budin_avena`, `cookies`, `cookies_xl`, `alfajores`, `pan`, `talitas`, `galleta_marinera`, `galletitas`, `torta` |
+| `product_category` | TEXT FK → `categories.id` | Categoría del producto; el formulario crea la fila en `categories` al vuelo si el usuario escribe una nueva |
 | `unit` | NUMERIC | Unidades por presentación (default 1) |
 | `grams` | NUMERIC | Peso en gramos (opcional, alternativa a unit) |
 | `wholesale_price` | NUMERIC | Precio mayorista |
@@ -125,7 +132,7 @@ Login (Supabase Auth)
 
 - [x] Autenticación (Supabase Auth, login único)
 - [x] Gestión de Clientes (CRUD: particulares y mayoristas, con `tax_status`)
-- [x] Catálogo de Productos (CRUD con soft delete; esquema `variety` + `unit`/`grams`)
+- [x] Catálogo de Productos (CRUD con soft delete; esquema `variety` + `unit`/`grams`; categorías en tabla `categories`, creables desde el formulario)
 - [x] Gestión de Pedidos (CRUD, estados, ítems con `order_item_status`, pagos mixtos)
 - [x] Validaciones de formularios robustas (Zod schemas completos, superRefine para mayoristas)
 - [x] Feedback visual consistente (notistack en todas las operaciones + mensajes amigables via getErrorMessage)

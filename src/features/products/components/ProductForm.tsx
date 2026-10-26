@@ -5,10 +5,8 @@ import * as z from 'zod';
 import {
   TextField,
   Button,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
+  Autocomplete,
+  createFilterOptions,
   FormHelperText,
   Grid,
   Box,
@@ -16,12 +14,22 @@ import {
   FormControlLabel,
   InputAdornment
 } from '@mui/material';
-import { PRODUCT_CATEGORIES, CATEGORY_IDS, type Product, type ProductType } from '../api/product.types';
+import { type Product, type ProductType } from '../api/product.types';
+import { categoryLabelMap } from '../utils/products.utils';
+import { useCategories } from '../api/useCategories';
+import { useCreateCategory } from '../api/useCreateCategory';
 import * as S from './ProductForm.styles';
+
+interface CategoryOption {
+  id: string;
+  label: string;
+}
+
+const categoryFilter = createFilterOptions<CategoryOption>();
 
 const schema = z.object({
   variety: z.string().min(1, 'Nombre demasiado corto'),
-  product_category: z.enum(CATEGORY_IDS),
+  product_category: z.string().min(1, 'La categoría es obligatoria'),
   unit: z.coerce.number().min(1, 'Mínimo 1 unidad'),
   grams: z.preprocess(
     (v) => (v === null || v === '' || v === undefined ? null : v),
@@ -41,6 +49,13 @@ interface ProductFormProps {
 }
 
 export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isReadOnly = false }: ProductFormProps) => {
+  const { data: categories } = useCategories();
+  const createCategory = useCreateCategory();
+  const categoryOptions: CategoryOption[] = (categories ?? []).map((c) => ({
+    id: c.id,
+    label: categoryLabelMap[c.id] ?? c.id,
+  }));
+
   const {
     control,
     handleSubmit,
@@ -83,35 +98,70 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
     }
   };
 
+  // Si la categoría elegida no existe todavía, la creamos antes de guardar el producto
+  // (la FK products.product_category -> categories.id la exige).
+  const handleValidSubmit = async (data: any) => {
+    const category = data.product_category.trim();
+    if (!categoryOptions.some((c) => c.id === category)) {
+      await createCategory.mutateAsync(category);
+    }
+    onSubmit({ ...data, product_category: category });
+  };
+
   return (
     <>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(handleValidSubmit)}>
         <S.FormWrapper>
           <Grid container spacing={3}>
 
             {/* Categoría */}
             <Grid size={{ xs: 12, md: 4 }}>
-              <FormControl fullWidth disabled={isReadOnly} error={!!errors.product_category}>
-                <InputLabel id="product-category-label">Categoría</InputLabel>
-                <Controller
-                  name="product_category"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      labelId="product-category-label"
-                      label="Categoría"
-                      {...field}
-                    >
-                      {PRODUCT_CATEGORIES.map((cat) => (
-                        <MenuItem key={cat.id} value={cat.id}>
-                          {cat.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  )}
-                />
-                <FormHelperText>{errors.product_category?.message}</FormHelperText>
-              </FormControl>
+              <Controller
+                name="product_category"
+                control={control}
+                render={({ field }) => (
+                  <Autocomplete
+                    freeSolo
+                    disabled={isReadOnly}
+                    options={categoryOptions}
+                    selectOnFocus
+                    clearOnBlur
+                    handleHomeEndKeys
+                    value={field.value || null}
+                    onChange={(_e, newValue) => {
+                      if (newValue == null) field.onChange('');
+                      else if (typeof newValue === 'string') field.onChange(newValue.trim());
+                      else field.onChange(newValue.id);
+                    }}
+                    filterOptions={(options, params) => {
+                      const filtered = categoryFilter(options, params);
+                      const trimmed = params.inputValue.trim();
+                      const isExisting = options.some((option) => option.label.toLowerCase() === trimmed.toLowerCase());
+                      if (trimmed !== '' && !isExisting) {
+                        filtered.push({ id: trimmed, label: `+ Crear categoría "${trimmed}"` });
+                      }
+                      return filtered;
+                    }}
+                    getOptionLabel={(option) =>
+                      typeof option === 'string' ? (categoryLabelMap[option] ?? option) : option.label
+                    }
+                    isOptionEqualToValue={(option, value) =>
+                      option.id === (typeof value === 'string' ? value : value.id)
+                    }
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Categoría"
+                        error={!!errors.product_category}
+                        helperText={
+                          errors.product_category?.message
+                          || 'Elegí una existente, o escribí una y confirmá con "+ Crear categoría"'
+                        }
+                      />
+                    )}
+                  />
+                )}
+              />
             </Grid>
 
             {/* Nombre */}
@@ -268,9 +318,9 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
                     type="submit"
                     variant="contained"
                     color="primary"
-                    disabled={isLoading}
+                    disabled={isLoading || createCategory.isPending}
                   >
-                    {isLoading ? 'Guardando...' : (initialData ? 'Actualizar' : 'Guardar')}
+                    {isLoading || createCategory.isPending ? 'Guardando...' : (initialData ? 'Actualizar' : 'Guardar')}
                   </Button>
                 </Box>
               </Grid>
