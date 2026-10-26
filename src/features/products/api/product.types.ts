@@ -1,4 +1,8 @@
 // src/features/products/api/product.types.ts
+// Etiquetas "lindas" para las categorías originales (pre-tabla `categories`).
+// `product_category` ahora es un id libre (FK a `categories.id`, ver useCategories);
+// una categoría nueva creada desde la UI no tiene entrada acá y se muestra tal cual
+// (ver categoryLabelMap en products.utils.ts, que cae a `id` si no hay label).
 export const PRODUCT_CATEGORIES = [
   { id: 'pepas', label: 'Pepas' },
   { id: 'budin_integral', label: 'Budín Integral' },
@@ -13,9 +17,8 @@ export const PRODUCT_CATEGORIES = [
   { id: 'torta', label: 'Torta' },
 ] as const;
 
-export type ProductType = (typeof PRODUCT_CATEGORIES)[number]['id'];
+export type ProductType = string;
 
-export const CATEGORY_IDS = PRODUCT_CATEGORIES.map(cat => cat.id) as [ProductType, ...ProductType[]];
 export interface Product {
   id: string;
   variety: string;
