@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [dev, main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build & test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Placeholders: the bundle is only built and inspected here, never deployed.
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Build (production)
+        run: npm run build
+      - name: Unit tests
+        run: npm test
+
+  migrations:
+    name: Migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      # Pinned (not `latest`): resolving `latest` calls the GitHub API, which rate-limits and failed
+      # this job before it ran a single migration. Bump together with the CLI you use locally.
+      - uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1
+        with:
+          version: 2.104.0
+      # `supabase start` applies every migration + seed.sql from scratch on a
+      # fresh database and fails if any file errors, so a broken migration is
+      # caught before it can reach main.
+      - name: Apply all migrations to a fresh local database
+        run: supabase start -x studio,mailpit,imgproxy,edge-runtime,logflare,vector,supavisor,postgres-meta
+      - name: Stop local stack
+        if: always()
+        run: supabase stop --no-backup
