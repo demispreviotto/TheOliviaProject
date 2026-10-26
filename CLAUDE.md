@@ -97,14 +97,15 @@ Run tests: `npm test` (run once) or `npm run test:watch`.
 | Table | Description |
 |---|---|
 | `customers` | Individual and wholesale customers; includes `tax_status` (final_consumer / simplified_taxpayer / registered_responsible / exempt) |
-| `products` | Catalog with `variety` (name), `unit`, `grams`, prices and category |
+| `products` | Catalog with `variety` (name), `unit`, `grams`, prices and `product_category` (TEXT FK → `categories.id`) |
+| `categories` | Product categories (`id` TEXT PK, the display text as-is). Replaces the old `product_type_enum`; new rows are created on the fly from the product form when the admin types a category that doesn't exist yet |
 | `orders` | Order headers (status, delivery, payment) |
 | `order_items` | Item detail with `order_item_status` (pending → cooking → ready → delivered / cancelled) |
 | `profiles` | Authenticated user profile (linked to `auth.users`) |
 
 RLS enabled on all tables. Full access for authenticated users.
 
-**Product categories** (`product_type_enum_v2`): `pepas`, `budin_integral`, `budin_avena`, `cookies`, `cookies_xl`, `alfajores`, `pan`, `talitas`, `galleta_marinera`, `galletitas`, `torta`.
+**Product categories**: seeded in `categories` with the original 11 values: `pepas`, `budin_integral`, `budin_avena`, `cookies`, `cookies_xl`, `alfajores`, `pan`, `talitas`, `galleta_marinera`, `galletitas`, `torta`. Pretty labels for these live in `PRODUCT_CATEGORIES` / `categoryLabelMap` (`src/features/products/api/product.types.ts`, `src/features/products/utils/products.utils.ts`); a category created later has no label entry and displays as the raw id the admin typed.
 
 **RPC functions**: `transition_items_to_cooking()` — transitions pending items to `cooking` when the delivery date arrives and syncs the order status.
 
