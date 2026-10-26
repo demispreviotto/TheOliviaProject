@@ -42,3 +42,5 @@ coverage/
 
 # Graphify
 graphify-out/
+.vercel
+.env*
