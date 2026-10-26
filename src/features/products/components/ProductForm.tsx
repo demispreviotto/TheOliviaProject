@@ -6,6 +6,7 @@ import {
   TextField,
   Button,
   Autocomplete,
+  createFilterOptions,
   FormHelperText,
   Grid,
   Box,
@@ -18,6 +19,13 @@ import { categoryLabelMap } from '../utils/products.utils';
 import { useCategories } from '../api/useCategories';
 import { useCreateCategory } from '../api/useCreateCategory';
 import * as S from './ProductForm.styles';
+
+interface CategoryOption {
+  id: string;
+  label: string;
+}
+
+const categoryFilter = createFilterOptions<CategoryOption>();
 
 const schema = z.object({
   variety: z.string().min(1, 'Nombre demasiado corto'),
@@ -43,7 +51,10 @@ interface ProductFormProps {
 export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isReadOnly = false }: ProductFormProps) => {
   const { data: categories } = useCategories();
   const createCategory = useCreateCategory();
-  const categoryOptions = (categories ?? []).map((c) => c.id);
+  const categoryOptions: CategoryOption[] = (categories ?? []).map((c) => ({
+    id: c.id,
+    label: categoryLabelMap[c.id] ?? c.id,
+  }));
 
   const {
     control,
@@ -91,7 +102,7 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
   // (la FK products.product_category -> categories.id la exige).
   const handleValidSubmit = async (data: any) => {
     const category = data.product_category.trim();
-    if (!categoryOptions.includes(category)) {
+    if (!categoryOptions.some((c) => c.id === category)) {
       await createCategory.mutateAsync(category);
     }
     onSubmit({ ...data, product_category: category });
@@ -113,18 +124,39 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
                     freeSolo
                     disabled={isReadOnly}
                     options={categoryOptions}
-                    getOptionLabel={(option) => categoryLabelMap[option] ?? option}
+                    selectOnFocus
+                    clearOnBlur
+                    handleHomeEndKeys
                     value={field.value || null}
-                    onChange={(_e, newValue) => field.onChange(newValue ?? '')}
-                    onInputChange={(_e, newValue, reason) => {
-                      if (reason === 'input') field.onChange(newValue);
+                    onChange={(_e, newValue) => {
+                      if (newValue == null) field.onChange('');
+                      else if (typeof newValue === 'string') field.onChange(newValue.trim());
+                      else field.onChange(newValue.id);
                     }}
+                    filterOptions={(options, params) => {
+                      const filtered = categoryFilter(options, params);
+                      const trimmed = params.inputValue.trim();
+                      const isExisting = options.some((option) => option.label.toLowerCase() === trimmed.toLowerCase());
+                      if (trimmed !== '' && !isExisting) {
+                        filtered.push({ id: trimmed, label: `+ Crear categoría "${trimmed}"` });
+                      }
+                      return filtered;
+                    }}
+                    getOptionLabel={(option) =>
+                      typeof option === 'string' ? (categoryLabelMap[option] ?? option) : option.label
+                    }
+                    isOptionEqualToValue={(option, value) =>
+                      option.id === (typeof value === 'string' ? value : value.id)
+                    }
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         label="Categoría"
                         error={!!errors.product_category}
-                        helperText={errors.product_category?.message || 'Elegí una existente o escribí una nueva'}
+                        helperText={
+                          errors.product_category?.message
+                          || 'Elegí una existente, o escribí una y confirmá con "+ Crear categoría"'
+                        }
                       />
                     )}
                   />
