@@ -14,10 +14,12 @@ import {
   FormControlLabel,
   InputAdornment
 } from '@mui/material';
+import { useSnackbar } from 'notistack';
 import { type Product, type ProductType } from '../api/product.types';
 import { categoryLabelMap } from '../utils/products.utils';
 import { useCategories } from '../api/useCategories';
 import { useCreateCategory } from '../api/useCreateCategory';
+import { getErrorMessage } from '../../../utils/errorMessages';
 import * as S from './ProductForm.styles';
 
 interface CategoryOption {
@@ -49,6 +51,7 @@ interface ProductFormProps {
 }
 
 export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isReadOnly = false }: ProductFormProps) => {
+  const { enqueueSnackbar } = useSnackbar();
   const { data: categories } = useCategories();
   const createCategory = useCreateCategory();
   const categoryOptions: CategoryOption[] = (categories ?? []).map((c) => ({
@@ -103,7 +106,12 @@ export const ProductForm = ({ initialData, onSubmit, onCancel, isLoading, isRead
   const handleValidSubmit = async (data: any) => {
     const category = data.product_category.trim();
     if (!categoryOptions.some((c) => c.id === category)) {
-      await createCategory.mutateAsync(category);
+      try {
+        await createCategory.mutateAsync(category);
+      } catch (error: unknown) {
+        enqueueSnackbar(getErrorMessage(error), { variant: 'error' });
+        return;
+      }
     }
     onSubmit({ ...data, product_category: category });
   };
